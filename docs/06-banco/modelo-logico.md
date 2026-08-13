@@ -10,10 +10,10 @@ definidos SQL, tipos específicos do SGBD, índices físicos ou migrations.
 
 -   MVP para um usuário em um computador.
 -   Banco local.
--   PDF é entrada e XML é artefato intermediário.
--   PDF/XML não são persistidos permanentemente.
+-   PDF é entrada e JSON é contrato de comunicação.
+-   PDF/artefatos intermediários não são persistidos permanentemente.
 -   Apenas dados estruturados e metadados necessários são persistidos.
--   O parser transforma o XML de layout em dados de domínio.
+-   O parser Python transforma o PDF em JSON estruturado; o backend transforma esse JSON em dados de domínio.
 -   Pessoas podem exercer papéis diferentes.
 -   Produções podem ter vários autores.
 -   Docentes e alunos precisam ser relacionados.
@@ -285,7 +285,7 @@ físico.
 -   `referencia`
 -   `identificador_origem`
 
-A entidade não armazena PDF ou XML.
+A entidade não armazena PDF ou artefatos intermediários.
 
 ## 10. Auditoria
 
@@ -356,7 +356,7 @@ PERIODO 1:N RESULTADO_INDICADOR
 -   Uma orientação deve possuir docente e aluno.
 -   Dados extraídos devem poder ser relacionados ao processamento de
     origem.
--   Nenhuma entidade acadêmica deve depender da persistência do PDF/XML.
+-   Nenhuma entidade acadêmica deve depender da persistência do PDF/artefatos intermediários.
 -   Uma classificação deve apontar para produção e critério.
 -   Um resultado deve apontar para o indicador que o gerou.
 -   Processamentos e versões do parser devem ser preservados.

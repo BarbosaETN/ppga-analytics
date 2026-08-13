@@ -2,7 +2,7 @@
 
 ## 1. Objetivo
 
-Validar que uma única pessoa, em um único computador, consegue importar Currículos Lattes em PDF, processá-los por PDF → XML → parser, transformar os conteúdos em dados estruturados persistentes e obter análises acadêmicas úteis.
+Validar que uma única pessoa, em um único computador, consegue importar Currículos Lattes em PDF, processá-los por PDF → parser Python → JSON → backend Node.js, transformar os conteúdos em dados estruturados persistentes e obter análises acadêmicas úteis.
 
 ## 2. Fluxo principal
 
@@ -13,11 +13,11 @@ Importa N PDFs
   ↓
 Validação
   ↓
-PDF → XML
+Parser Python
   ↓
-Parser
+JSON
   ↓
-Normalização
+Backend Node.js / regras de negócio
   ↓
 Dados estruturados
   ↓
@@ -25,7 +25,7 @@ Banco local
   ↓
 Indicadores / Dashboard / Relatórios
   ↓
-PDF/XML temporários descartados
+PDF temporário descartado e JSON de comunicação não persistido como arquivo
 ```
 
 ## 3. Usuário
@@ -41,7 +41,8 @@ Não serão necessários múltiplos usuários simultâneos no primeiro ciclo.
 - docentes;
 - alunos;
 - importação de PDFs;
-- conversão PDF → XML;
+- processamento do PDF pelo parser Python;
+- entrega de JSON padronizado ao backend;
 - parser;
 - normalização;
 - persistência dos dados extraídos;
@@ -83,7 +84,7 @@ O MVP deverá persistir:
 O MVP não deverá persistir permanentemente:
 
 - PDF original;
-- XML intermediário.
+- arquivo JSON intermediário persistido permanentemente.
 
 ## 6. Processamento em lote
 
@@ -177,7 +178,7 @@ O MVP será considerado validado quando:
 1. os currículos de teste forem processados;
 2. o parser produzir dados estruturados;
 3. os dados forem persistidos corretamente;
-4. PDF e XML puderem ser descartados sem perda das informações necessárias;
+4. PDF puder ser descartado sem perda das informações necessárias e o JSON tiver sido processado pelo backend;
 5. docentes e alunos forem relacionados corretamente;
 6. produções forem consultáveis;
 7. indicadores básicos forem calculados;
@@ -191,7 +192,7 @@ O MVP será considerado validado quando:
 - SaaS;
 - cloud obrigatória;
 - armazenamento de PDFs;
-- armazenamento permanente de XMLs;
+- armazenamento permanente do JSON de comunicação como arquivo;
 - integração automática com Lattes;
 - benchmarking entre instituições;
 - IA avançada;

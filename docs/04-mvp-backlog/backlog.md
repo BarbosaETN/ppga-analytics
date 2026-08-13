@@ -13,8 +13,8 @@
 | EP-01 | Fundação local | P0 |
 | EP-02 | Usuário e acesso | P0 |
 | EP-03 | Instituição, programa, docentes e alunos | P0 |
-| EP-04 | Importação e pipeline PDF/XML | P0 |
-| EP-05 | Parser e dados acadêmicos | P0 |
+| EP-04 | Importação e pipeline PDF → JSON | P0 |
+| EP-05 | Parser Python e dados acadêmicos | P0 |
 | EP-06 | Relações docente–aluno–produção | P0 |
 | EP-07 | Qualidade e rastreabilidade | P0 |
 | EP-08 | Ensino, Pesquisa e Extensão | P0 |
@@ -58,18 +58,17 @@
 - US-019 Upload de PDF.
 - US-020 Validar PDF.
 - US-021 Criar registro de importação.
-- US-022 Converter PDF para XML.
-- US-023 Validar XML.
-- US-024 Executar parser XML.
+- US-022 Enviar o PDF ao parser Python.
+- US-023 Receber e validar o JSON produzido pelo parser.
+- US-024 Persistir os dados estruturados recebidos.
 - US-025 Registrar status.
-- US-026 Remover PDF temporário.
-- US-027 Remover XML temporário.
-- US-028 Permitir reprocessamento.
-- US-029 Versionar parser.
+- US-026 Descartar o PDF temporário.
+- US-027 Permitir reprocessamento.
+- US-028 Versionar parser.
 
 ## 7. EP-05 — Parser e dados
 
-- US-030 Extrair identificação.
+- US-030 Extrair identificação no parser Python.
 - US-031 Extrair formação.
 - US-032 Extrair Ensino.
 - US-033 Extrair Pesquisa.
@@ -77,9 +76,9 @@
 - US-035 Extrair autores.
 - US-036 Extrair orientações.
 - US-037 Extrair Extensão.
-- US-038 Normalizar dados.
+- US-038 Normalizar dados no parser Python.
 - US-039 Validar dados.
-- US-040 Detectar possíveis duplicidades.
+- US-040 Detectar possíveis duplicidades e sinalizar ao backend.
 
 ## 8. EP-06 — Docente, aluno e produção
 
@@ -163,7 +162,7 @@
 - US-097 Auditoria de alterações.
 - US-098 Auditoria de classificações.
 - US-099 Testes unitários.
-- US-100 Testes do parser.
+- US-100 Testes do parser Python.
 - US-101 Testes de integração.
 - US-102 Teste do pipeline completo.
 
@@ -200,7 +199,7 @@ Estrutura acadêmica
   ↓
 Importação
   ↓
-PDF → XML → Parser
+PDF → Python Parser → JSON → Backend
   ↓
 Dados estruturados
   ↓

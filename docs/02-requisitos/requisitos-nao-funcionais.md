@@ -9,7 +9,7 @@ O MVP deverá funcionar inicialmente em um único computador.
 O banco de dados do MVP deverá poder ser executado localmente no computador do usuário.
 
 ### RNF-003 — Independência de arquivos
-O funcionamento permanente do sistema não deverá depender do armazenamento dos PDFs ou XMLs originais.
+O funcionamento permanente do sistema não deverá depender do armazenamento dos PDFs ou dos artefatos intermediários originais.
 
 ### RNF-004 — Evolução
 A arquitetura deverá permitir futura migração para ambiente servidor/cloud sem reconstrução completa do domínio.
@@ -17,7 +17,7 @@ A arquitetura deverá permitir futura migração para ambiente servidor/cloud se
 ## 2. Processamento
 
 ### RNF-005 — Pipeline
-O processamento deverá seguir, conceitualmente, PDF → XML → parser → dados estruturados.
+O processamento deverá seguir, conceitualmente, PDF → parser Python → JSON → backend Node.js → dados estruturados.
 
 ### RNF-006 — Processamento não bloqueante
 O processamento de arquivos deverá evitar bloqueio desnecessário da interface.
@@ -34,7 +34,7 @@ O processamento deverá poder ser repetido com controle de versão.
 Somente dados acadêmicos estruturados e metadados necessários deverão ser persistidos.
 
 ### RNF-010 — Arquivos temporários
-PDF e XML deverão ser tratados como arquivos temporários.
+O PDF deverá ser tratado como arquivo temporário. O JSON será utilizado como contrato de comunicação entre o parser Python e o backend Node.js e não deverá depender de armazenamento permanente em arquivo.
 
 ### RNF-011 — Descarte
 Arquivos temporários deverão ser removidos após processamento, conforme política definida pela aplicação.

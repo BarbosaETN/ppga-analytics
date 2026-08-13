@@ -39,11 +39,11 @@ O sistema deverá permitir importar Currículos Lattes em PDF.
 ### RF-011 — Validação do arquivo
 O sistema deverá validar o arquivo antes do processamento.
 
-### RF-012 — Conversão PDF → XML
-O sistema deverá converter o PDF recebido para XML como etapa intermediária do processamento.
+### RF-012 — Processamento pelo parser Python
+O sistema deverá enviar o PDF ao componente de extração desenvolvido em Python.
 
-### RF-013 — Parser XML
-O sistema deverá interpretar o XML e extrair informações relevantes.
+### RF-013 — Recebimento do JSON
+O sistema deverá receber do parser Python um JSON padronizado contendo os dados extraídos.
 
 ### RF-014 — Normalização
 O sistema deverá normalizar os dados extraídos.
@@ -51,8 +51,8 @@ O sistema deverá normalizar os dados extraídos.
 ### RF-015 — Persistência dos dados
 O sistema deverá persistir os dados acadêmicos estruturados.
 
-### RF-016 — Descarte de arquivos temporários
-Após o processamento, o sistema deverá permitir o descarte do PDF e do XML temporários.
+### RF-016 — Descarte de arquivo temporário
+Após o processamento, o sistema deverá descartar o PDF temporário. O JSON de comunicação não deverá ser persistido como arquivo permanente.
 
 ### RF-017 — Status de processamento
 O sistema deverá informar o status do processamento.
@@ -178,7 +178,7 @@ O MVP não deverá exigir:
 - múltiplos usuários;
 - operação simultânea;
 - armazenamento permanente de PDF;
-- armazenamento permanente de XML;
+- armazenamento permanente do JSON de comunicação como arquivo;
 - integração automática com Lattes;
 - SaaS;
 - benchmarking externo.
