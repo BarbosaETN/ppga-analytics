@@ -19,14 +19,14 @@ Extração, normalização, classificação e cálculo de indicadores são etapa
 ### RN-005 — Entrada
 O currículo recebido no MVP será um PDF.
 
-### RN-006 — Conversão
-O PDF deverá ser convertido para XML antes da interpretação definida pelo pipeline.
+### RN-006 — Extração Python
+O PDF deverá ser processado pelo componente de extração desenvolvido em Python.
 
-### RN-007 — XML intermediário
-O XML será utilizado como artefato intermediário e não como armazenamento permanente obrigatório.
+### RN-007 — JSON de saída
+O parser Python deverá entregar ao backend Node.js um JSON padronizado contendo os dados extraídos e normalizados.
 
-### RN-008 — Descarte
-PDF e XML deverão ser descartados após o processamento, salvo necessidade técnica temporária devidamente controlada.
+### RN-008 — Arquivo temporário
+O PDF deverá ser tratado como arquivo temporário e descartado após o processamento, salvo necessidade técnica temporária devidamente controlada. O JSON de comunicação não deverá ser tratado como armazenamento permanente de arquivos.
 
 ### RN-009 — Processamento
 Cada execução deverá possuir status e identificação.
@@ -128,7 +128,7 @@ O processamento deverá registrar a versão do parser.
 Quando disponível, deverão ser preservados seção, referência ou localização lógica da informação extraída.
 
 ### RN-038 — Arquivo original
-A rastreabilidade não deverá depender da persistência permanente do PDF ou XML.
+A rastreabilidade não deverá depender da persistência permanente do PDF ou do JSON de comunicação.
 
 ## 9. Histórico
 

@@ -31,7 +31,7 @@ estiver instalado.
 
 ## 2.2 Arquivos Lattes
 
-PDF e XML serão arquivos temporários.
+O PDF será arquivo temporário. O JSON será trafegado entre parser e backend e não será persistido como arquivo permanente.
 
 O banco **não possuirá BLOBs para armazenar os documentos**.
 
@@ -40,13 +40,15 @@ Fluxo:
 ``` text
 PDF temporário
      ↓
-XML temporário
+Parser Python
      ↓
-Parser
+JSON
+     ↓
+Backend
      ↓
 SQLite
      ↓
-PDF/XML descartados
+PDF descartado; JSON de comunicação não persistido como arquivo
 ```
 
 ## 2.3 Integridade referencial
@@ -1020,7 +1022,7 @@ Não existirão tabelas como:
 
 ``` text
 pdf
-xml
+json
 arquivo_lattes
 documento
 ```
@@ -1057,7 +1059,7 @@ Isso mantém o banco leve e independente dos arquivos originais.
 └───────┬───────┘
         ↓
 ┌───────────────┐
-│ XML temporário│
+│ JSON temporário│
 └───────┬───────┘
         ↓
 ┌───────────────┐
@@ -1071,7 +1073,7 @@ Isso mantém o banco leve e independente dos arquivos originais.
         SQLite
            ↓
 ┌──────────────────────┐
-│ PDF/XML são apagados │
+│ PDF temporário é apagado; JSON de comunicação não é persistido como arquivo │
 └──────────────────────┘
 ```
 

@@ -4,9 +4,9 @@
 
 O PPGA Analytics é uma aplicação para apoiar a análise e o acompanhamento da atuação acadêmica de docentes e alunos de um Programa de Pós-Graduação.
 
-A primeira versão será utilizada por **um único usuário, em um único computador**, com banco de dados local. O sistema deverá receber Currículos Lattes em PDF, processá-los por meio de um pipeline PDF → XML → parser e persistir somente os dados acadêmicos extraídos e estruturados.
+A primeira versão será utilizada por **um único usuário, em um único computador**, com banco de dados local. O sistema deverá receber Currículos Lattes em PDF, processá-los por meio de um pipeline PDF → parser Python → JSON → backend e persistir somente os dados acadêmicos extraídos e estruturados.
 
-Os arquivos PDF e XML serão tratados como artefatos temporários de processamento e não farão parte do armazenamento permanente do sistema.
+Os arquivos PDF e os artefatos técnicos temporários do processamento não farão parte do armazenamento permanente do sistema. O JSON produzido pelo parser será transferido ao backend e não precisa ser persistido como arquivo.
 
 ## 2. Problema
 
@@ -34,7 +34,7 @@ O MVP será direcionado a um único usuário e um único computador. Não haver�
 - SaaS;
 - infraestrutura multi-instituição;
 - armazenamento permanente de PDFs;
-- armazenamento permanente de XMLs;
+- armazenamento permanente de artefatos intermediários;
 - integração automática com o Lattes.
 
 A arquitetura deverá, entretanto, evitar decisões que impeçam evolução futura.
@@ -48,9 +48,7 @@ Importação
    ↓
 Validação
    ↓
-Conversão PDF → XML
-   ↓
-Parser
+Parser Python
    ↓
 Normalização
    ↓
@@ -60,7 +58,7 @@ Banco local
    ↓
 Indicadores / análises / relatórios
 
-PDF e XML → descarte após processamento
+PDF → descarte após processamento; JSON → transferido ao backend e não armazenado como arquivo permanente
 ```
 
 ## 6. Domínio principal

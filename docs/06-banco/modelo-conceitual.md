@@ -9,7 +9,7 @@ Representar as entidades e relacionamentos principais do PPGA Analytics sem defi
 1. O MVP será utilizado por um único usuário.
 2. O MVP será executado em um único computador.
 3. O banco será local no MVP.
-4. PDFs e XMLs serão temporários.
+4. PDFs são temporários; JSON é contrato de comunicação e não é armazenamento permanente.
 5. Somente dados estruturados e metadados necessários serão persistidos.
 6. Alunos fazem parte do domínio.
 7. Produções podem envolver docentes e alunos.
@@ -118,11 +118,11 @@ PDF
  ↓
 Importação
  ↓
-Conversão PDF → XML
+Parser Python
  ↓
-Processamento
+JSON
  ↓
-Parser
+Backend / Processamento
  ↓
 Normalização
  ↓
@@ -131,7 +131,7 @@ Dados estruturados
 Banco
 ```
 
-PDF e XML não são entidades de armazenamento permanente.
+PDF e JSON de comunicação não são entidades de armazenamento permanente.
 
 ## 8. Histórico de processamento
 
@@ -144,7 +144,7 @@ O sistema deverá preservar metadados de processamento, como:
 - erros;
 - alertas.
 
-Isso permite rastrear a origem dos dados sem manter o PDF ou XML.
+Isso permite rastrear a origem dos dados sem manter o PDF ou artefatos intermediários.
 
 ## 9. Classificação
 
@@ -192,7 +192,7 @@ Quando possível, também deverão ser preservados:
 - identificador da informação;
 - versão do parser.
 
-A rastreabilidade não dependerá da persistência do PDF/XML.
+A rastreabilidade não dependerá da persistência do PDF/artefatos intermediários.
 
 ## 12. Visão conceitual
 

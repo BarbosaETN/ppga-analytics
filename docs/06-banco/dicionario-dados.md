@@ -59,7 +59,7 @@ Analytics.
 Ainda não define:
 
 -   SQL;
--   tipo específico de PostgreSQL, MySQL, SQLite etc.;
+-   tipo físico definitivo do SQLite;
 -   tamanho físico definitivo das colunas;
 -   índices físicos;
 -   migrations;
@@ -272,7 +272,7 @@ O arquivo físico pode existir somente durante o processamento.
 
 # 11. PROCESSAMENTO
 
-Representa uma execução do pipeline PDF → XML → Parser.
+Representa uma execução do processamento de um currículo pelo parser Python e pelo backend.
 
   -----------------------------------------------------------------------------
   Campo                   Tipo lógico       Regras            Descrição
@@ -621,7 +621,7 @@ Registra a origem lógica de um dado extraído.
 
 ### Importante
 
-Esta tabela não armazena o PDF nem o XML.
+Esta tabela não armazena o PDF nem o JSON de comunicação.
 
 Ela permite manter rastreabilidade mesmo depois do descarte dos arquivos
 temporários.
@@ -741,7 +741,7 @@ inexistência da atividade.
 
 ### DD-009 --- Arquivos
 
-PDF e XML são temporários e não devem ser requisitos para consultar os
+PDF e artefatos intermediários são temporários e não devem ser requisitos para consultar os
 dados persistidos.
 
 ### DD-010 --- Rastreabilidade
