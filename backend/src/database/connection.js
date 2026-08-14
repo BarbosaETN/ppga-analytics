@@ -7,4 +7,8 @@ const sequelize = new Sequelize({
     logging: false
 });
 
+sequelize.addHook('afterConnect', async (connection) => {
+    await connection.run('PRAGMA foreign_keys = ON');
+});
+
 export default sequelize;
