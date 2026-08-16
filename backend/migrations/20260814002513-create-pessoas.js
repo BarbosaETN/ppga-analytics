@@ -1,9 +1,8 @@
-"use strict";
+'use strict';
 
-/** @type {import('sequelize-cli').Migration} */
 export default {
     async up(queryInterface, Sequelize) {
-        await queryInterface.createTable("pessoas", {
+        await queryInterface.createTable('pessoa', {
             id: {
                 type: Sequelize.INTEGER,
                 primaryKey: true,
@@ -12,72 +11,32 @@ export default {
             },
 
             nome_completo: {
-                type: Sequelize.STRING(200),
+                type: Sequelize.TEXT,
                 allowNull: false
             },
 
-            nome_social: {
-                type: Sequelize.STRING(200),
-                allowNull: true
-            },
-
-            cpf: {
-                type: Sequelize.STRING(14),
+            identificador_lattes: {
+                type: Sequelize.TEXT,
                 allowNull: true,
                 unique: true
             },
 
-            lattes_id: {
-                type: Sequelize.STRING(16),
-                allowNull: true,
-                unique: true
-            },
-
-            email: {
-                type: Sequelize.STRING(255),
+            nome_normalizado: {
+                type: Sequelize.TEXT,
                 allowNull: true
-            },
-
-            data_nascimento: {
-                type: Sequelize.DATEONLY,
-                allowNull: true
-            },
-
-            nacionalidade: {
-                type: Sequelize.STRING(100),
-                allowNull: true
-            },
-
-            sexo: {
-                type: Sequelize.STRING(30),
-                allowNull: true
-            },
-
-            cidade: {
-                type: Sequelize.STRING(100),
-                allowNull: true
-            },
-
-            uf: {
-                type: Sequelize.STRING(2),
-                allowNull: true
-            },
-
-            criado_em: {
-                type: Sequelize.DATE,
-                allowNull: false,
-                defaultValue: Sequelize.literal("CURRENT_TIMESTAMP")
-            },
-
-            atualizado_em: {
-                type: Sequelize.DATE,
-                allowNull: false,
-                defaultValue: Sequelize.literal("CURRENT_TIMESTAMP")
             }
         });
+
+        await queryInterface.addIndex(
+            'pessoa',
+            ['nome_normalizado'],
+            {
+                name: 'idx_pessoa_nome_normalizado'
+            }
+        );
     },
 
     async down(queryInterface) {
-        await queryInterface.dropTable("pessoas");
+        await queryInterface.dropTable('pessoa');
     }
 };
