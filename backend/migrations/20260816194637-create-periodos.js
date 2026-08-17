@@ -34,6 +34,6 @@ export default {
   },
 
   async down(queryInterface) {
-    await queryInterface.dropTable('periodos');
+    await queryInterface.dropTable('periodo');
   },
 };
