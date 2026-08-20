@@ -9,7 +9,7 @@ def ler_pdf(pdf_path):
 
         for page in pdf.pages:
 
-            words = page.extract_words(use_text_flow=True)
+            words = page.extract_words(use_text_flow=True, extra_attrs=["fontname", "size"])
 
             paginas.append(words)
 
@@ -32,7 +32,9 @@ def agrupar_em_linhas(words):
             linhas.append({
                 "top": word["top"],
                 "x0": word["x0"],
-                "text": word["text"]
+                "text": word["text"],
+                "fontname": word.get("fontname", "Desconhecida"),
+                "size": word.get("size", 0)
             })
 
         else:
@@ -50,7 +52,9 @@ def agrupar_em_linhas(words):
                 linhas.append({
                     "top": word["top"],
                     "x0": word["x0"],
-                    "text": word["text"]
+                    "text": word["text"],
+                    "fontname": word.get("fontname", "Desconhecida"),
+                    "size": word.get("size", 0)
                 })
 
     return linhas
