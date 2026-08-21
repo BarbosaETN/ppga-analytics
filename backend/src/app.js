@@ -2,11 +2,15 @@ import express from 'express';
 import cors from 'cors';
 import { sequelize } from './database/index.js';
 import { errorHandler } from './middlewares/error-handler.js';
+import router from './routes/index.js'
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use('/api/v1', router);
+app.use(errorHandler);
+
 
 app.get('/api/v1/health', async (req, res) => {
     try {
