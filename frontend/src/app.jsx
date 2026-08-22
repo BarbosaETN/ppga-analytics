@@ -1,17 +1,12 @@
-import Header from "./components/Header";
-import Sidebar from"./components/Sidebar";
+import MainLayout from "./components/MainLayout";
 import Dashboard from "./pages/Dashboard";
 
 function App() {
   return (
-    <>
-      <Header titulo="PPGA ANALYTICS"/>
-      
-      <Sidebar />
-
+    <MainLayout>
       <Dashboard />
-    </>
-  ); 
+    </MainLayout>
+  );
 }
 
 export default App;
