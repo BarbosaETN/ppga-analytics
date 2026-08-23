@@ -27,7 +27,7 @@ function Sidebar() {
                     <h2>ANÁLISES</h2>
                     <ul>
                         <li>Indicadores</li>
-                        <li>Ranking</li>
+                        <li>Ranking dos docentes</li>
                         <li>Comparativos</li>
                     </ul>
                 </div>
@@ -36,7 +36,7 @@ function Sidebar() {
                     <h2>MONITORAMENTO</h2>
                     <ul>
                         <li>Alertas</li>
-                        <li>Históricos</li>
+                        <li>Histórico</li>
                     </ul>
                 </div>
 
