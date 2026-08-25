@@ -23,6 +23,59 @@ class PessoaController {
             return next(error);
         }
     }
+
+    async buscarPorId(req, res, next) {
+        try {
+            const pessoa = await this.pessoaService.buscarPorId(
+                req.params.id
+            );
+
+            return res.status(200).json({
+                data: pessoa
+            });
+        } catch (error) {
+            return next(error);
+        }
+    }
+
+    async listar(req, res, next) {
+        try {
+            const pessoas = await this.pessoaService.listar();
+
+            return res.status(200).json({
+                data: pessoas
+            });
+        } catch (error) {
+            return next(error);
+        }
+    }
+
+    async atualizar(req, res, next) {
+        try {
+            const pessoa = await this.pessoaService.atualizar(
+                req.params.id,
+                req.body
+            );
+
+            return res.status(200).json({
+                data: pessoa
+            });
+        } catch (error) {
+            return next(error);
+        }
+    }
+
+    async remover(req, res, next) {
+        try {
+            await this.pessoaService.remover(
+                req.params.id
+            );
+
+            return res.status(204).send();
+        } catch (error) {
+            return next(error);
+        }
+    }
 }
 
 export default PessoaController;
