@@ -65,6 +65,18 @@ class InstituicaoController {
             return next(error);
         }
     }
+
+    async excluir(req, res, next) {
+        try {
+            await this.instituicaoService.excluir(
+                req.params.id
+            );
+
+            return res.status(204).send();
+        } catch (error) {
+            return next(error);
+        }
+    }
 }
 
 export default InstituicaoController;

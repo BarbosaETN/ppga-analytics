@@ -174,6 +174,66 @@ class InstituicaoService {
 
         return instituicao;
     }
+
+    async excluir(id, options = {}) {
+        const instituicaoId = Number(id);
+
+        if (
+            !Number.isInteger(instituicaoId) ||
+            instituicaoId < 1
+        ) {
+            throw new AppError(
+                'id deve ser um número inteiro positivo.',
+                {
+                    statusCode: 400,
+                    code: 'VALIDATION_ERROR',
+                    details: {
+                        campo: 'id'
+                    }
+                }
+            );
+        }
+
+        const instituicao =
+            await this.instituicaoRepository.findById(
+                instituicaoId,
+                options
+            );
+
+        if (!instituicao) {
+            throw new AppError(
+                'Instituição não encontrada.',
+                {
+                    statusCode: 404,
+                    code: 'INSTITUICAO_NOT_FOUND',
+                    details: {
+                        id: instituicaoId
+                    }
+                }
+            );
+        }
+
+        try {
+            await instituicao.destroy(options);
+        } catch (error) {
+            if (
+                error.name === 'SequelizeForeignKeyConstraintError'
+            ) {
+                throw new AppError(
+                    'Não é possível excluir a instituição porque existem registros relacionados.',
+                    {
+                        statusCode: 409,
+                        code: 'INSTITUICAO_HAS_DEPENDENCIES',
+                        details: {
+                            id: instituicaoId
+                        }
+                    }
+                );
+            }
+
+            throw error;
+        }
+    }
 }
 
 export default InstituicaoService;

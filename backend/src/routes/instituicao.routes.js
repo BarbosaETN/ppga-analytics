@@ -36,4 +36,11 @@ instituicaoRouter.patch(
     )
 );
 
+instituicaoRouter.delete(
+    '/:id',
+    instituicaoController.excluir.bind(
+        instituicaoController
+    )
+);
+
 export default instituicaoRouter;

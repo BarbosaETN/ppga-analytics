@@ -11,6 +11,8 @@ import {
 
 import { randomUUID } from 'node:crypto';
 
+import Programa from '../src/database/models/programa.js';
+
 import app from '../src/app.js';
 import {
     Instituicao,
@@ -462,6 +464,125 @@ describe('PATCH /api/v1/instituicoes/:id', () => {
                 details: {
                     campo: 'nome'
                 }
+            }
+        });
+    });
+});
+
+describe('DELETE /api/v1/instituicoes/:id', () => {
+    test('exclui uma instituição pelo id', async () => {
+        const instituicao =
+            await Instituicao.create({
+                nome: 'Instituição para exclusão',
+                sigla: 'DELETE'
+            });
+
+        const response = await fetch(
+            `${baseUrl}/api/v1/instituicoes/${instituicao.id}`,
+            {
+                method: 'DELETE'
+            }
+        );
+
+        expect(response.status).toBe(204);
+
+        const instituicaoExcluida =
+            await Instituicao.findByPk(
+                instituicao.id
+            );
+
+        expect(instituicaoExcluida).toBeNull();
+    });
+
+    test('retorna 404 ao tentar excluir uma instituição que não existe', async () => {
+        const instituicaoInexistenteId = 999999999;
+
+        const response = await fetch(
+            `${baseUrl}/api/v1/instituicoes/${instituicaoInexistenteId}`,
+            {
+                method: 'DELETE'
+            }
+        );
+
+        const body = await response.json();
+
+        expect(response.status).toBe(404);
+
+        expect(body).toEqual({
+            error: {
+                code: 'INSTITUICAO_NOT_FOUND',
+                message: 'Instituição não encontrada.',
+                details: {
+                    id: instituicaoInexistenteId
+                }
+            }
+        });
+    });
+
+    test('retorna 400 quando o id da instituição é inválido ao excluir', async () => {
+        const response = await fetch(
+            `${baseUrl}/api/v1/instituicoes/abc`,
+            {
+                method: 'DELETE'
+            }
+        );
+
+        const body = await response.json();
+
+        expect(response.status).toBe(400);
+
+        expect(body).toEqual({
+            error: {
+                code: 'VALIDATION_ERROR',
+                message: 'id deve ser um número inteiro positivo.',
+                details: {
+                    campo: 'id'
+                }
+            }
+        });
+    });
+
+    test('retorna erro ao tentar excluir uma instituição que possui programas relacionados', async () => {
+        const instituicao =
+            await Instituicao.create({
+                nome: 'Instituição com programa',
+                sigla: `INST-${randomUUID().slice(0, 8)}`
+            });
+
+        instituicaoIdCriada = instituicao.id;
+
+        const programa =
+            await Programa.create({
+                instituicao_id: instituicao.id,
+                nome: 'Programa relacionado',
+                sigla: `PROG-${randomUUID().slice(0, 8)}`
+            });
+
+        const response = await fetch(
+            `${baseUrl}/api/v1/instituicoes/${instituicao.id}`,
+            {
+                method: 'DELETE'
+            }
+        );
+
+        const body = await response.json();
+
+        expect(response.status).toBe(409);
+
+        expect(body).toEqual({
+            error: {
+                code: 'INSTITUICAO_HAS_DEPENDENCIES',
+                message:
+                    'Não é possível excluir a instituição porque existem registros relacionados.',
+                details: {
+                    id: instituicao.id
+                }
+            }
+        });
+
+        await Programa.destroy({
+            where: {
+                id: programa.id
             }
         });
     });
