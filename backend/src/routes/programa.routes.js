@@ -15,4 +15,32 @@ programaRouter.post(
     )
 );
 
+programaRouter.get(
+    '/',
+    programaController.listar.bind(
+        programaController
+    )
+);
+
+programaRouter.get(
+    '/:id',
+    programaController.buscarPorId.bind(
+        programaController
+    )
+);
+
+programaRouter.patch(
+    '/:id',
+    programaController.atualizar.bind(
+        programaController
+    )
+);
+
+programaRouter.delete(
+    '/:id',
+    programaController.excluir.bind(
+        programaController
+    )
+);
+
 export default programaRouter;
