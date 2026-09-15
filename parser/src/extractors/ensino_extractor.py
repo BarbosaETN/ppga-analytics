@@ -16,17 +16,38 @@ def eh_secao_principal(linha):
 def eh_secao_atuacao_profissional(linha):
     return linha["text"].strip().lower() == "atuação profissional"
 
+def extrair_secao_atuacao_profissional(linhas):
+
+    resultado = []
+
+    dentro_secao = False
+
+    for linha in linhas:
+        # Encontrou o título "Atuação Profissional"
+        if eh_secao_atuacao_profissional(linha):
+
+            dentro_secao = True
+            continue
+
+        # Se já estamos dentro de Atuação Profissional
+        # e encontramos outra seção principal,
+        # a seção terminou
+        if dentro_secao and eh_secao_principal(linha):
+
+            break
+
+        # Enquanto estiver dentro da seção,
+        # Guarda a linha
+        if dentro_secao:
+
+            resultado.append(linha)
+
+    return resultado
+
 def eh_instituicao(linha):
 
     return (
-        abs(linha["x0"] - 107.42) < 2
-        and linha["fontname"] == "GAAAAA+Tahoma-Bold"
-        and abs(linha["size"] - 7.83) < 0.2
-        and linha["non_stroking_color"] == (
-            0.6706,
-            0.6706,
-            0.6706
-        )
+        linha["fontname"]
     )
 
 
@@ -75,7 +96,7 @@ def eh_conteudo(linha):
     return abs(linha["x0"] - 210.90) < 3
 
 
-def extrair_atuacao_profissional(linhas):
+def montar_atuacao(linhas):
 
     resultado = []
 
