@@ -275,4 +275,74 @@ describe("POST /api/v1/alunos", () => {
       },
     });
   });
+
+  test("retorna erro ao tentar cadastrar a mesma pessoa no mesmo programa", async () => {
+    const pessoa = await Pessoa.create({
+      nome_completo: "Pessoa duplicada",
+      identificador_lattes: `LATTES-${randomUUID()}`,
+    });
+
+    pessoaIdCriada = pessoa.id;
+
+    const instituicao = await Instituicao.create({
+      nome: "Instituição da Duplicidade",
+      sigla: `INST-${randomUUID().slice(0, 8)}`,
+    });
+
+    instituicaoIdCriada = instituicao.id;
+
+    const programa = await Programa.create({
+      instituicao_id: instituicao.id,
+      nome: "Programa da Duplicidade",
+      sigla: "PD",
+    });
+
+    programaIdCriado = programa.id;
+
+    const primeiroResponse = await fetch(`${baseUrl}/api/v1/alunos`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        pessoa_id: pessoa.id,
+        programa_id: programa.id,
+      }),
+    });
+
+    const primeiroBody = await primeiroResponse.json();
+
+    alunoIdCriado = primeiroBody.data.id;
+
+    expect(primeiroResponse.status).toBe(201);
+
+    const segundoResponse = await fetch(`${baseUrl}/api/v1/alunos`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        pessoa_id: pessoa.id,
+        programa_id: programa.id,
+      }),
+    });
+
+    const segundoBody = await segundoResponse.json();
+
+    expect(segundoBody).toEqual({
+      error: {
+        code: "ALUNO_ALREADY_EXISTS",
+        message: "A pessoa já está cadastrada neste programa.",
+        details: null,
+      },
+    });
+
+    console.log(
+      "Resposta da duplicidade:",
+      segundoResponse.status,
+      segundoBody,
+    );
+
+    expect(segundoResponse.status).toBe(409);
+  });
 });
