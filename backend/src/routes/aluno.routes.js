@@ -25,4 +25,9 @@ alunoRouter.get(
     alunoController.buscarPorId.bind(alunoController)
 );
 
+alunoRouter.patch(
+    '/:id',
+    alunoController.atualizar.bind(alunoController)
+);
+
 export default alunoRouter;

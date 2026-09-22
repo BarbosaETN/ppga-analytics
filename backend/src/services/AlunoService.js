@@ -121,6 +121,59 @@ class AlunoService {
 
     return aluno;
   }
+
+  async atualizar(id, dados, options = {}) {
+    const alunoId = Number(id);
+
+    if (!Number.isInteger(alunoId) || alunoId < 1) {
+      throw new AppError("id deve ser um número inteiro positivo.", {
+        statusCode: 400,
+        code: "VALIDATION_ERROR",
+        details: {
+          campo: "id",
+        },
+      });
+    }
+
+    const aluno = await this.alunoRepository.findById(alunoId, options);
+
+    if (!aluno) {
+      throw new AppError("Aluno não encontrado.", {
+        statusCode: 404,
+        code: "ALUNO_NOT_FOUND",
+        details: {
+          id: alunoId,
+        },
+      });
+    }
+
+    const camposPermitidos = ["nivel", "situacao", "ano_ingresso"];
+
+    const dadosAtualizacao = {};
+
+    for (const campo of camposPermitidos) {
+      if (dados[campo] !== undefined) {
+        dadosAtualizacao[campo] = dados[campo];
+      }
+    }
+
+    if (Object.keys(dadosAtualizacao).length === 0) {
+      throw new AppError(
+        "Nenhum campo válido para atualização foi informado.",
+        {
+          statusCode: 400,
+          code: "VALIDATION_ERROR",
+          details: {
+            campos_permitidos: camposPermitidos,
+          },
+        },
+      );
+    }
+
+    await aluno.update(dadosAtualizacao, options);
+
+    return aluno;
+  }
 }
 
 export default AlunoService;

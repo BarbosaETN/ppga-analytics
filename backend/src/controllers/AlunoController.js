@@ -42,6 +42,18 @@ class AlunoController {
       return next(error);
     }
   }
+
+  async atualizar(req, res, next) {
+    try {
+      const aluno = await this.alunoService.atualizar(req.params.id, req.body);
+
+      return res.status(200).json({
+        data: aluno,
+      });
+    } catch (error) {
+      return next(error);
+    }
+  }
 }
 
 export default AlunoController;

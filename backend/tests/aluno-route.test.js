@@ -513,3 +513,232 @@ describe("GET /api/v1/alunos/:id", () => {
     });
   });
 });
+
+describe("PATCH /api/v1/alunos/:id", () => {
+  test("atualiza um aluno pelo id", async () => {
+    const pessoa = await Pessoa.create({
+      nome_completo: "Pessoa para atualização",
+      identificador_lattes: `teste-api-${randomUUID()}`,
+    });
+
+    const instituicao = await Instituicao.create({
+      nome: "Instituição da Duplicidade",
+      sigla: `INST-${randomUUID().slice(0, 8)}`,
+    });
+
+    const instituicaoIdCriada = instituicao.id;
+
+    const programa = await Programa.create({
+      instituicao_id: instituicaoIdCriada,
+      nome: "Programa para atualização",
+      sigla: `PROG-${randomUUID().slice(0, 8)}`,
+    });
+
+    const aluno = await Aluno.create({
+      pessoa_id: pessoa.id,
+      programa_id: programa.id,
+      nivel: "Mestrado",
+      situacao: "Ativo",
+      ano_ingresso: 2025,
+    });
+
+    alunoIdCriado = aluno.id;
+
+    const response = await fetch(`${baseUrl}/api/v1/alunos/${aluno.id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        nivel: "Doutorado",
+        situacao: "Concluído",
+        ano_ingresso: 2026,
+      }),
+    });
+
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+
+    expect(body.data).toMatchObject({
+      id: aluno.id,
+      pessoa_id: pessoa.id,
+      programa_id: programa.id,
+      nivel: "Doutorado",
+      situacao: "Concluído",
+      ano_ingresso: 2026,
+    });
+  });
+
+  test("retorna 404 ao tentar atualizar um aluno que não existe", async () => {
+    const alunoInexistenteId = 999999999;
+
+    const response = await fetch(
+      `${baseUrl}/api/v1/alunos/${alunoInexistenteId}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          nivel: "Doutorado",
+        }),
+      },
+    );
+
+    const body = await response.json();
+
+    expect(response.status).toBe(404);
+
+    expect(body).toEqual({
+      error: {
+        code: "ALUNO_NOT_FOUND",
+        message: "Aluno não encontrado.",
+        details: {
+          id: alunoInexistenteId,
+        },
+      },
+    });
+  });
+
+  test("retorna 400 quando o id do aluno é inválido", async () => {
+    const response = await fetch(`${baseUrl}/api/v1/alunos/abc`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        nivel: "Doutorado",
+      }),
+    });
+
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+
+    expect(body).toEqual({
+      error: {
+        code: "VALIDATION_ERROR",
+        message: "id deve ser um número inteiro positivo.",
+        details: {
+          campo: "id",
+        },
+      },
+    });
+  });
+
+  test("retorna 400 quando nenhum campo válido é informado", async () => {
+    const pessoa = await Pessoa.create({
+      nome_completo: "Pessoa sem alteração",
+      identificador_lattes: `teste-api-${randomUUID()}`,
+    });
+
+    const instituicao = await Instituicao.create({
+      nome: "Instituição da Duplicidade",
+      sigla: `INST-${randomUUID().slice(0, 8)}`,
+    });
+
+    const instituicaoIdCriada = instituicao.id;
+
+    const programa = await Programa.create({
+      instituicao_id: instituicaoIdCriada,
+      nome: "Programa sem alteração",
+      sigla: `PROG-${randomUUID().slice(0, 8)}`,
+    });
+
+    const aluno = await Aluno.create({
+      pessoa_id: pessoa.id,
+      programa_id: programa.id,
+      nivel: "Mestrado",
+      situacao: "Ativo",
+      ano_ingresso: 2025,
+    });
+
+    alunoIdCriado = aluno.id;
+
+    const response = await fetch(`${baseUrl}/api/v1/alunos/${aluno.id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({}),
+    });
+
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+
+    expect(body).toEqual({
+      error: {
+        code: "VALIDATION_ERROR",
+        message: "Nenhum campo válido para atualização foi informado.",
+        details: {
+          campos_permitidos: ["nivel", "situacao", "ano_ingresso"],
+        },
+      },
+    });
+  });
+
+  test("ignora campos não permitidos na atualização", async () => {
+    const pessoa = await Pessoa.create({
+      nome_completo: "Pessoa original",
+      identificador_lattes: `teste-api-${randomUUID()}`,
+    });
+
+    const outraPessoa = await Pessoa.create({
+      nome_completo: "Outra pessoa",
+      identificador_lattes: `teste-api-${randomUUID()}`,
+    });
+
+    const instituicao = await Instituicao.create({
+      nome: "Instituição da Duplicidade",
+      sigla: `INST-${randomUUID().slice(0, 8)}`,
+    });
+
+    const instituicaoIdCriada = instituicao.id;
+
+    const programa = await Programa.create({
+      instituicao_id: instituicaoIdCriada,
+      nome: "Programa original",
+      sigla: `PROG-${randomUUID().slice(0, 8)}`,
+    });
+
+    const outroPrograma = await Programa.create({
+      instituicao_id: instituicaoIdCriada,
+      nome: "Outro programa",
+      sigla: `PROG-${randomUUID().slice(0, 8)}`,
+    });
+
+    const aluno = await Aluno.create({
+      pessoa_id: pessoa.id,
+      programa_id: programa.id,
+      nivel: "Mestrado",
+      situacao: "Ativo",
+      ano_ingresso: 2025,
+    });
+
+    alunoIdCriado = aluno.id;
+
+    const response = await fetch(`${baseUrl}/api/v1/alunos/${aluno.id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        pessoa_id: outraPessoa.id,
+        programa_id: outroPrograma.id,
+        nivel: "Doutorado",
+      }),
+    });
+
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+
+    expect(body.data).toMatchObject({
+      pessoa_id: pessoa.id,
+      programa_id: programa.id,
+      nivel: "Doutorado",
+    });
+  });
+});
