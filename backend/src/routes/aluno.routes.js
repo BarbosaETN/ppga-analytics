@@ -15,4 +15,14 @@ alunoRouter.post(
     )
 );
 
+alunoRouter.get(
+    '/',
+    alunoController.listar.bind(alunoController)
+);
+
+alunoRouter.get(
+    '/:id',
+    alunoController.buscarPorId.bind(alunoController)
+);
+
 export default alunoRouter;

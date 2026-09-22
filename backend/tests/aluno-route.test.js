@@ -346,3 +346,170 @@ describe("POST /api/v1/alunos", () => {
     expect(segundoResponse.status).toBe(409);
   });
 });
+
+describe("GET /api/v1/alunos", () => {
+  test("retorna todos os alunos", async () => {
+    const pessoa1 = await Pessoa.create({
+      nome_completo: "Aluno 1",
+      identificador_lattes: `teste-api-${randomUUID()}`,
+    });
+
+    const pessoa2 = await Pessoa.create({
+      nome_completo: "Aluno 2",
+      identificador_lattes: `teste-api-${randomUUID()}`,
+    });
+
+    const instituicao = await Instituicao.create({
+      nome: "Instituição da Duplicidade",
+      sigla: `INST-${randomUUID().slice(0, 8)}`,
+    });
+
+    const instituicaoIdCriada = instituicao.id;
+
+    const programa = await Programa.create({
+      instituicao_id: instituicaoIdCriada,
+      nome: "Programa para teste",
+      sigla: `PROG-${randomUUID().slice(0, 8)}`,
+    });
+
+    await Aluno.create({
+      pessoa_id: pessoa1.id,
+      programa_id: programa.id,
+      nivel: "Mestrado",
+      situacao: "Ativo",
+      ano_ingresso: 2026,
+    });
+
+    await Aluno.create({
+      pessoa_id: pessoa2.id,
+      programa_id: programa.id,
+      nivel: "Doutorado",
+      situacao: "Ativo",
+      ano_ingresso: 2026,
+    });
+
+    const response = await fetch(`${baseUrl}/api/v1/alunos`);
+
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+
+    expect(body.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          pessoa_id: pessoa1.id,
+          programa_id: programa.id,
+          nivel: "Mestrado",
+        }),
+        expect.objectContaining({
+          pessoa_id: pessoa2.id,
+          programa_id: programa.id,
+          nivel: "Doutorado",
+        }),
+      ]),
+    );
+  });
+
+  test("retorna lista vazia quando não existem alunos", async () => {
+    await Aluno.destroy({
+      where: {},
+    });
+
+    const response = await fetch(`${baseUrl}/api/v1/alunos`);
+
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+
+    expect(body).toEqual({
+      data: [],
+    });
+  });
+});
+
+describe("GET /api/v1/alunos/:id", () => {
+  test("retorna um aluno pelo id", async () => {
+    const pessoa = await Pessoa.create({
+      nome_completo: "Pessoa para consulta",
+      identificador_lattes: `teste-api-${randomUUID()}`,
+    });
+
+    const instituicao = await Instituicao.create({
+      nome: "Instituição da Duplicidade",
+      sigla: `INST-${randomUUID().slice(0, 8)}`,
+    });
+
+    const instituicaoIdCriada = instituicao.id;
+
+    const programa = await Programa.create({
+      instituicao_id: instituicaoIdCriada,
+      nome: "Programa para consulta",
+      sigla: `PROG-${randomUUID().slice(0, 8)}`,
+    });
+
+    const aluno = await Aluno.create({
+      pessoa_id: pessoa.id,
+      programa_id: programa.id,
+      nivel: "Mestrado",
+      situacao: "Ativo",
+      ano_ingresso: 2026,
+    });
+
+    alunoIdCriado = aluno.id;
+
+    const response = await fetch(`${baseUrl}/api/v1/alunos/${aluno.id}`);
+
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+
+    expect(body.data).toMatchObject({
+      id: aluno.id,
+      pessoa_id: pessoa.id,
+      programa_id: programa.id,
+      nivel: "Mestrado",
+      situacao: "Ativo",
+      ano_ingresso: 2026,
+    });
+  });
+
+  test("retorna 404 quando o aluno não existe", async () => {
+    const alunoInexistenteId = 999999999;
+
+    const response = await fetch(
+      `${baseUrl}/api/v1/alunos/${alunoInexistenteId}`,
+    );
+
+    const body = await response.json();
+
+    expect(response.status).toBe(404);
+
+    expect(body).toEqual({
+      error: {
+        code: "ALUNO_NOT_FOUND",
+        message: "Aluno não encontrado.",
+        details: {
+          id: alunoInexistenteId,
+        },
+      },
+    });
+  });
+
+  test("retorna 400 quando o id do aluno é inválido", async () => {
+    const response = await fetch(`${baseUrl}/api/v1/alunos/abc`);
+
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+
+    expect(body).toEqual({
+      error: {
+        code: "VALIDATION_ERROR",
+        message: "id deve ser um número inteiro positivo.",
+        details: {
+          campo: "id",
+        },
+      },
+    });
+  });
+});
