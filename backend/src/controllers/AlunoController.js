@@ -54,6 +54,16 @@ class AlunoController {
       return next(error);
     }
   }
+
+  async excluir(req, res, next) {
+    try {
+      await this.alunoService.excluir(req.params.id);
+
+      return res.status(204).send();
+    } catch (error) {
+      return next(error);
+    }
+  }
 }
 
 export default AlunoController;

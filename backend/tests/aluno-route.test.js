@@ -742,3 +742,88 @@ describe("PATCH /api/v1/alunos/:id", () => {
     });
   });
 });
+
+describe("DELETE /api/v1/alunos/:id", () => {
+  test("exclui um aluno pelo id", async () => {
+    const pessoa = await Pessoa.create({
+      nome_completo: "Pessoa para exclusão",
+      identificador_lattes: `teste-api-${randomUUID()}`,
+    });
+
+    const instituicao = await Instituicao.create({
+      nome: "Instituição da Duplicidade",
+      sigla: `INST-${randomUUID().slice(0, 8)}`,
+    });
+
+    const instituicaoIdCriada = instituicao.id;
+
+    const programa = await Programa.create({
+      instituicao_id: instituicaoIdCriada,
+      nome: "Programa para exclusão",
+      sigla: `PROG-${randomUUID().slice(0, 8)}`,
+    });
+
+    const aluno = await Aluno.create({
+      pessoa_id: pessoa.id,
+      programa_id: programa.id,
+      nivel: "Mestrado",
+      situacao: "Ativo",
+      ano_ingresso: 2025,
+    });
+
+    const response = await fetch(`${baseUrl}/api/v1/alunos/${aluno.id}`, {
+      method: "DELETE",
+    });
+
+    expect(response.status).toBe(204);
+
+    const alunoExcluido = await Aluno.findByPk(aluno.id);
+
+    expect(alunoExcluido).toBeNull();
+  });
+
+  test("retorna 404 ao tentar excluir um aluno que não existe", async () => {
+    const alunoInexistenteId = 999999999;
+
+    const response = await fetch(
+      `${baseUrl}/api/v1/alunos/${alunoInexistenteId}`,
+      {
+        method: "DELETE",
+      },
+    );
+
+    const body = await response.json();
+
+    expect(response.status).toBe(404);
+
+    expect(body).toEqual({
+      error: {
+        code: "ALUNO_NOT_FOUND",
+        message: "Aluno não encontrado.",
+        details: {
+          id: alunoInexistenteId,
+        },
+      },
+    });
+  });
+
+  test("retorna 400 quando o id do aluno é inválido ao excluir", async () => {
+    const response = await fetch(`${baseUrl}/api/v1/alunos/abc`, {
+      method: "DELETE",
+    });
+
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+
+    expect(body).toEqual({
+      error: {
+        code: "VALIDATION_ERROR",
+        message: "id deve ser um número inteiro positivo.",
+        details: {
+          campo: "id",
+        },
+      },
+    });
+  });
+});

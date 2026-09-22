@@ -174,6 +174,36 @@ class AlunoService {
 
     return aluno;
   }
+
+  async excluir(id, options = {}) {
+    const alunoId = Number(id);
+
+    if (!Number.isInteger(alunoId) || alunoId < 1) {
+      throw new AppError("id deve ser um número inteiro positivo.", {
+        statusCode: 400,
+        code: "VALIDATION_ERROR",
+        details: {
+          campo: "id",
+        },
+      });
+    }
+
+    const aluno = await this.alunoRepository.findById(alunoId, options);
+
+    if (!aluno) {
+      throw new AppError("Aluno não encontrado.", {
+        statusCode: 404,
+        code: "ALUNO_NOT_FOUND",
+        details: {
+          id: alunoId,
+        },
+      });
+    }
+
+    await aluno.destroy(options);
+
+    return;
+  }
 }
 
 export default AlunoService;

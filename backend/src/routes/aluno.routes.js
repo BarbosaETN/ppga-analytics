@@ -30,4 +30,9 @@ alunoRouter.patch(
     alunoController.atualizar.bind(alunoController)
 );
 
+alunoRouter.delete(
+    '/:id',
+    alunoController.excluir.bind(alunoController)
+);
+
 export default alunoRouter;
