@@ -17,4 +17,19 @@ periodoRouter.get(
     periodoController.listar.bind(periodoController)
 );
 
+periodoRouter.get(
+    '/:id',
+    periodoController.buscarPorId.bind(periodoController)
+);
+
+periodoRouter.patch(
+    '/:id',
+    periodoController.atualizar.bind(periodoController)
+);
+
+periodoRouter.delete(
+    '/:id',
+    periodoController.excluir.bind(periodoController)
+);
+
 export default periodoRouter;
