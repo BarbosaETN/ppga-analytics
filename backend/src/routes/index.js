@@ -9,6 +9,7 @@ import alunoRouter from './aluno.routes.js';
 import periodoRouter from './periodo.routes.js';
 import parserVersaoRouter from "./parser-versao.routes.js";
 import docenteRouter from './docente.routes.js';
+import importacaoRouter from "./importacao.js";
 
 const router = Router();
 
@@ -19,5 +20,6 @@ router.use('/alunos', alunoRouter);
 router.use('/periodos', periodoRouter);
 router.use('/parser-versoes', parserVersaoRouter);
 router.use('/docentes', docenteRouter)
+router.use('/importacoes', importacaoRouter)
 
 export default router;
