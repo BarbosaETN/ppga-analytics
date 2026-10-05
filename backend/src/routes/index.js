@@ -9,7 +9,7 @@ import alunoRouter from './aluno.routes.js';
 import periodoRouter from './periodo.routes.js';
 import parserVersaoRouter from "./parser-versao.routes.js";
 import docenteRouter from './docente.routes.js';
-import importacaoRouter from "./importacao.js";
+import importacaoRouter from "./importacao.routes.js";
 
 const router = Router();
 
