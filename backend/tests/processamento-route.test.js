@@ -353,3 +353,133 @@ describe("POST /api/v1/processamentos", () => {
     expect(body.error.code).toBe("VALIDATION_ERROR");
   });
 });
+
+describe("GET /api/v1/processamentos", () => {
+  test("retorna todos os processamentos", async () => {
+    const importacao = await Importacao.create({
+      docente_id: null,
+      nome_arquivo_original: "curriculo.xml",
+      hash_arquivo: "hash-get-lista",
+      data_importacao: "2026-10-07T10:00:00",
+      status: "CONCLUIDA",
+    });
+
+    importacaoIdCriada = importacao.id;
+
+    const parserVersao = await ParserVersao.create({
+      versao: `1.0.${randomUUID().slice(0, 6)}`,
+      descricao: "Versão para teste de listagem",
+      criado_em: "2026-10-07T09:00:00",
+    });
+
+    parserVersaoIdCriada = parserVersao.id;
+
+    const processamento = await Processamento.create({
+      importacao_id: importacao.id,
+      parser_versao_id: parserVersao.id,
+      iniciado_em: "2026-10-07T10:30:00",
+      finalizado_em: "2026-10-07T10:35:00",
+      status: "CONCLUIDO",
+      registros_processados: 100,
+      erros: null,
+      alertas: null,
+    });
+
+    processamentoIdCriado = processamento.id;
+
+    const response = await fetch(`${baseUrl}/api/v1/processamentos`);
+
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+
+    expect(body.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: processamento.id,
+          importacao_id: importacao.id,
+          parser_versao_id: parserVersao.id,
+          iniciado_em: "2026-10-07T10:30:00",
+          finalizado_em: "2026-10-07T10:35:00",
+          status: "CONCLUIDO",
+          registros_processados: 100,
+        }),
+      ]),
+    );
+  });
+});
+
+describe("GET /api/v1/processamentos/:id", () => {
+  test("retorna um processamento pelo id", async () => {
+    const importacao = await Importacao.create({
+      docente_id: null,
+      nome_arquivo_original: "curriculo.xml",
+      hash_arquivo: "hash-get-id",
+      data_importacao: "2026-10-07T11:00:00",
+      status: "CONCLUIDA",
+    });
+
+    importacaoIdCriada = importacao.id;
+
+    const parserVersao = await ParserVersao.create({
+      versao: `1.0.${randomUUID().slice(0, 6)}`,
+      descricao: "Versão para consulta",
+      criado_em: "2026-10-07T10:00:00",
+    });
+
+    parserVersaoIdCriada = parserVersao.id;
+
+    const processamento = await Processamento.create({
+      importacao_id: importacao.id,
+      parser_versao_id: parserVersao.id,
+      iniciado_em: "2026-10-07T11:30:00",
+      finalizado_em: "2026-10-07T11:35:00",
+      status: "CONCLUIDO",
+      registros_processados: 200,
+      erros: null,
+      alertas: null,
+    });
+
+    processamentoIdCriado = processamento.id;
+
+    const response = await fetch(
+      `${baseUrl}/api/v1/processamentos/${processamento.id}`,
+    );
+
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+
+    expect(body.data).toMatchObject({
+      id: processamento.id,
+      importacao_id: importacao.id,
+      parser_versao_id: parserVersao.id,
+      iniciado_em: "2026-10-07T11:30:00",
+      finalizado_em: "2026-10-07T11:35:00",
+      status: "CONCLUIDO",
+      registros_processados: 200,
+    });
+  });
+
+  test("retorna 404 quando o processamento não existe", async () => {
+    const processamentoInexistenteId = 999999999;
+
+    const response = await fetch(
+      `${baseUrl}/api/v1/processamentos/${processamentoInexistenteId}`,
+    );
+
+    const body = await response.json();
+
+    expect(response.status).toBe(404);
+
+    expect(body).toEqual({
+      error: {
+        code: "PROCESSAMENTO_NOT_FOUND",
+        message: "Processamento não encontrado.",
+        details: {
+          id: processamentoInexistenteId,
+        },
+      },
+    });
+  });
+});
