@@ -11,6 +11,7 @@ import parserVersaoRouter from "./parser-versao.routes.js";
 import docenteRouter from './docente.routes.js';
 import importacaoRouter from "./importacao.routes.js";
 import processamentoRouter from "./processamento.routes.js";
+import formacaoRouter from './formacao.routes.js';
 
 const router = Router();
 
@@ -20,8 +21,9 @@ router.use('/programas', programaRouter);
 router.use('/alunos', alunoRouter);
 router.use('/periodos', periodoRouter);
 router.use('/parser-versoes', parserVersaoRouter);
-router.use('/docentes', docenteRouter)
-router.use('/importacoes', importacaoRouter)
-router.use('/processamentos', processamentoRouter)
+router.use('/docentes', docenteRouter);
+router.use('/importacoes', importacaoRouter);
+router.use('/processamentos', processamentoRouter);
+router.use('/formacoes', formacaoRouter);
 
 export default router;
