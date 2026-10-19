@@ -306,3 +306,430 @@ describe("POST /api/v1/formacoes", () => {
     expect(body.error.details.campo).toBe("nivel");
   });
 });
+
+describe("GET /api/v1/formacoes", () => {
+  test("lista as formações", async () => {
+    const instituicao = await Instituicao.create({
+      nome: `Instituição ${randomUUID()}`,
+      sigla: `INS-${randomUUID().slice(0, 6)}`,
+    });
+    instituicaoIdCriada = instituicao.id;
+
+    const programa = await Programa.create({
+      instituicao_id: instituicao.id,
+      nome: `Programa ${randomUUID()}`,
+      sigla: `PRO-${randomUUID().slice(0, 6)}`,
+    });
+    programaIdCriado = programa.id;
+
+    const pessoa = await Pessoa.create({
+      nome_completo: `Pessoa ${randomUUID()}`,
+      lattes_id: randomUUID(),
+    });
+    pessoaIdCriada = pessoa.id;
+
+    const docente = await Docente.create({
+      pessoa_id: pessoa.id,
+      programa_id: programa.id,
+      categoria: "Permanente",
+      ativo: 1,
+    });
+    docenteIdCriado = docente.id;
+
+    const formacao = await Formacao.create({
+      docente_id: docente.id,
+      nivel: "Doutorado",
+      curso: "Ciência da Computação",
+      instituicao: "Universidade Federal de São Paulo",
+      ano_inicio: 2018,
+      ano_conclusao: 2022,
+      titulo: "Doutor em Ciência da Computação",
+    });
+    formacaoIdCriada = formacao.id;
+
+    const response = await fetch(`${baseUrl}/api/v1/formacoes`);
+
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(Array.isArray(body.data)).toBe(true);
+
+    const formacaoEncontrada = body.data.find(
+      (item) => item.id === formacao.id,
+    );
+
+    expect(formacaoEncontrada).toBeDefined();
+    expect(formacaoEncontrada.docente_id).toBe(docente.id);
+    expect(formacaoEncontrada.nivel).toBe("Doutorado");
+  });
+});
+
+describe("GET /api/v1/formacoes/:id", () => {
+  test("busca uma formação pelo id", async () => {
+    const instituicao = await Instituicao.create({
+      nome: `Instituição ${randomUUID()}`,
+      sigla: `INS-${randomUUID().slice(0, 6)}`,
+    });
+    instituicaoIdCriada = instituicao.id;
+
+    const programa = await Programa.create({
+      instituicao_id: instituicao.id,
+      nome: `Programa ${randomUUID()}`,
+      sigla: `PRO-${randomUUID().slice(0, 6)}`,
+    });
+    programaIdCriado = programa.id;
+
+    const pessoa = await Pessoa.create({
+      nome_completo: `Pessoa ${randomUUID()}`,
+      lattes_id: randomUUID(),
+    });
+    pessoaIdCriada = pessoa.id;
+
+    const docente = await Docente.create({
+      pessoa_id: pessoa.id,
+      programa_id: programa.id,
+      categoria: "Permanente",
+      ativo: 1,
+    });
+    docenteIdCriado = docente.id;
+
+    const formacao = await Formacao.create({
+      docente_id: docente.id,
+      nivel: "Mestrado",
+      curso: "Engenharia de Software",
+      instituicao: "Universidade de São Paulo",
+      ano_inicio: 2016,
+      ano_conclusao: 2018,
+      titulo: "Mestre em Engenharia de Software",
+    });
+    formacaoIdCriada = formacao.id;
+
+    const response = await fetch(`${baseUrl}/api/v1/formacoes/${formacao.id}`);
+
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+
+    expect(body.data.id).toBe(formacao.id);
+    expect(body.data.docente_id).toBe(docente.id);
+    expect(body.data.nivel).toBe("Mestrado");
+    expect(body.data.curso).toBe("Engenharia de Software");
+  });
+
+  test("retorna 404 quando a formação não existe", async () => {
+    const response = await fetch(`${baseUrl}/api/v1/formacoes/999999`);
+
+    const body = await response.json();
+
+    expect(response.status).toBe(404);
+    expect(body.error.code).toBe("FORMACAO_NOT_FOUND");
+    expect(body.error.details.id).toBe(999999);
+  });
+});
+
+describe("PATCH /api/v1/formacoes/:id", () => {
+  test("atualiza uma formação", async () => {
+    const instituicao = await Instituicao.create({
+      nome: `Instituição ${randomUUID()}`,
+      sigla: `INS-${randomUUID().slice(0, 6)}`,
+    });
+    instituicaoIdCriada = instituicao.id;
+
+    const programa = await Programa.create({
+      instituicao_id: instituicao.id,
+      nome: `Programa ${randomUUID()}`,
+      sigla: `PRO-${randomUUID().slice(0, 6)}`,
+    });
+    programaIdCriado = programa.id;
+
+    const pessoa = await Pessoa.create({
+      nome_completo: `Pessoa ${randomUUID()}`,
+      lattes_id: randomUUID(),
+    });
+    pessoaIdCriada = pessoa.id;
+
+    const docente = await Docente.create({
+      pessoa_id: pessoa.id,
+      programa_id: programa.id,
+      categoria: "Permanente",
+      ativo: 1,
+    });
+    docenteIdCriado = docente.id;
+
+    const formacao = await Formacao.create({
+      docente_id: docente.id,
+      nivel: "Mestrado",
+      curso: "Engenharia de Software",
+      instituicao: "Universidade de São Paulo",
+      ano_inicio: 2016,
+      ano_conclusao: 2018,
+      titulo: "Mestre em Engenharia de Software",
+    });
+    formacaoIdCriada = formacao.id;
+
+    const response = await fetch(`${baseUrl}/api/v1/formacoes/${formacao.id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        nivel: "Doutorado",
+        curso: "Ciência da Computação",
+        instituicao: "Universidade Federal de São Paulo",
+        ano_inicio: 2019,
+        ano_conclusao: 2023,
+        titulo: "Doutor em Ciência da Computação",
+      }),
+    });
+
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+
+    expect(body.data.id).toBe(formacao.id);
+    expect(body.data.docente_id).toBe(docente.id);
+    expect(body.data.nivel).toBe("Doutorado");
+    expect(body.data.curso).toBe("Ciência da Computação");
+    expect(body.data.instituicao).toBe("Universidade Federal de São Paulo");
+    expect(body.data.ano_inicio).toBe(2019);
+    expect(body.data.ano_conclusao).toBe(2023);
+    expect(body.data.titulo).toBe("Doutor em Ciência da Computação");
+  });
+
+  test("retorna 400 quando o id é inválido", async () => {
+    const response = await fetch(`${baseUrl}/api/v1/formacoes/abc`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        nivel: "Doutorado",
+      }),
+    });
+
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.error.code).toBe("VALIDATION_ERROR");
+    expect(body.error.details.campo).toBe("id");
+  });
+
+  test("retorna 404 quando a formação não existe", async () => {
+    const response = await fetch(`${baseUrl}/api/v1/formacoes/999999`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        nivel: "Doutorado",
+      }),
+    });
+
+    const body = await response.json();
+
+    expect(response.status).toBe(404);
+    expect(body.error.code).toBe("FORMACAO_NOT_FOUND");
+    expect(body.error.details.id).toBe(999999);
+  });
+
+  test("retorna 400 quando docente_id é inválido", async () => {
+    const instituicao = await Instituicao.create({
+      nome: `Instituição ${randomUUID()}`,
+      sigla: `INS-${randomUUID().slice(0, 6)}`,
+    });
+    instituicaoIdCriada = instituicao.id;
+
+    const programa = await Programa.create({
+      instituicao_id: instituicao.id,
+      nome: `Programa ${randomUUID()}`,
+      sigla: `PRO-${randomUUID().slice(0, 6)}`,
+    });
+    programaIdCriado = programa.id;
+
+    const pessoa = await Pessoa.create({
+      nome_completo: `Pessoa ${randomUUID()}`,
+      lattes_id: randomUUID(),
+    });
+    pessoaIdCriada = pessoa.id;
+
+    const docente = await Docente.create({
+      pessoa_id: pessoa.id,
+      programa_id: programa.id,
+      categoria: "Permanente",
+      ativo: 1,
+    });
+    docenteIdCriado = docente.id;
+
+    const formacao = await Formacao.create({
+      docente_id: docente.id,
+      nivel: "Mestrado",
+    });
+    formacaoIdCriada = formacao.id;
+
+    const response = await fetch(`${baseUrl}/api/v1/formacoes/${formacao.id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        docente_id: "abc",
+      }),
+    });
+
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.error.code).toBe("VALIDATION_ERROR");
+    expect(body.error.details.campo).toBe("docente_id");
+  });
+
+  test("retorna 404 quando o novo docente não existe", async () => {
+    const instituicao = await Instituicao.create({
+      nome: `Instituição ${randomUUID()}`,
+      sigla: `INS-${randomUUID().slice(0, 6)}`,
+    });
+    instituicaoIdCriada = instituicao.id;
+
+    const programa = await Programa.create({
+      instituicao_id: instituicao.id,
+      nome: `Programa ${randomUUID()}`,
+      sigla: `PRO-${randomUUID().slice(0, 6)}`,
+    });
+    programaIdCriado = programa.id;
+
+    const pessoa = await Pessoa.create({
+      nome_completo: `Pessoa ${randomUUID()}`,
+      lattes_id: randomUUID(),
+    });
+    pessoaIdCriada = pessoa.id;
+
+    const docente = await Docente.create({
+      pessoa_id: pessoa.id,
+      programa_id: programa.id,
+      categoria: "Permanente",
+      ativo: 1,
+    });
+    docenteIdCriado = docente.id;
+
+    const formacao = await Formacao.create({
+      docente_id: docente.id,
+      nivel: "Mestrado",
+    });
+    formacaoIdCriada = formacao.id;
+
+    const response = await fetch(`${baseUrl}/api/v1/formacoes/${formacao.id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        docente_id: 999999,
+      }),
+    });
+
+    const body = await response.json();
+
+    expect(response.status).toBe(404);
+    expect(body.error.code).toBe("DOCENTE_NOT_FOUND");
+    expect(body.error.details.id).toBe(999999);
+  });
+
+  test("retorna 400 quando nivel é vazio", async () => {
+    const instituicao = await Instituicao.create({
+      nome: `Instituição ${randomUUID()}`,
+      sigla: `INS-${randomUUID().slice(0, 6)}`,
+    });
+    instituicaoIdCriada = instituicao.id;
+
+    const programa = await Programa.create({
+      instituicao_id: instituicao.id,
+      nome: `Programa ${randomUUID()}`,
+      sigla: `PRO-${randomUUID().slice(0, 6)}`,
+    });
+    programaIdCriado = programa.id;
+
+    const pessoa = await Pessoa.create({
+      nome_completo: `Pessoa ${randomUUID()}`,
+      lattes_id: randomUUID(),
+    });
+    pessoaIdCriada = pessoa.id;
+
+    const docente = await Docente.create({
+      pessoa_id: pessoa.id,
+      programa_id: programa.id,
+      categoria: "Permanente",
+      ativo: 1,
+    });
+    docenteIdCriado = docente.id;
+
+    const formacao = await Formacao.create({
+      docente_id: docente.id,
+      nivel: "Mestrado",
+    });
+    formacaoIdCriada = formacao.id;
+
+    const response = await fetch(`${baseUrl}/api/v1/formacoes/${formacao.id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        nivel: "",
+      }),
+    });
+
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.error.code).toBe("VALIDATION_ERROR");
+    expect(body.error.details.campo).toBe("nivel");
+  });
+
+  test("retorna 400 quando nenhum campo é informado", async () => {
+    const instituicao = await Instituicao.create({
+      nome: `Instituição ${randomUUID()}`,
+      sigla: `INS-${randomUUID().slice(0, 6)}`,
+    });
+    instituicaoIdCriada = instituicao.id;
+
+    const programa = await Programa.create({
+      instituicao_id: instituicao.id,
+      nome: `Programa ${randomUUID()}`,
+      sigla: `PRO-${randomUUID().slice(0, 6)}`,
+    });
+    programaIdCriado = programa.id;
+
+    const pessoa = await Pessoa.create({
+      nome_completo: `Pessoa ${randomUUID()}`,
+      lattes_id: randomUUID(),
+    });
+    pessoaIdCriada = pessoa.id;
+
+    const docente = await Docente.create({
+      pessoa_id: pessoa.id,
+      programa_id: programa.id,
+      categoria: "Permanente",
+      ativo: 1,
+    });
+    docenteIdCriado = docente.id;
+
+    const formacao = await Formacao.create({
+      docente_id: docente.id,
+      nivel: "Mestrado",
+    });
+    formacaoIdCriada = formacao.id;
+
+    const response = await fetch(`${baseUrl}/api/v1/formacoes/${formacao.id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({}),
+    });
+
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.error.code).toBe("VALIDATION_ERROR");
+  });
+});
