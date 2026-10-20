@@ -12,6 +12,7 @@ import docenteRouter from './docente.routes.js';
 import importacaoRouter from "./importacao.routes.js";
 import processamentoRouter from "./processamento.routes.js";
 import formacaoRouter from './formacao.routes.js';
+import orientacaoRouter from './orientacao.routes.js';
 
 const router = Router();
 
@@ -25,5 +26,6 @@ router.use('/docentes', docenteRouter);
 router.use('/importacoes', importacaoRouter);
 router.use('/processamentos', processamentoRouter);
 router.use('/formacoes', formacaoRouter);
+router.use('/orientacoes', orientacaoRouter);
 
 export default router;
