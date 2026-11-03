@@ -4,59 +4,65 @@ import AtividadeEnsinoService from '../services/AtividadeEnsinoService.js';
 
 class AtividadeEnsinoController {
     constructor() {
-        this.atividadeEnsinoService = new AtividadeEnsinoService();
+        this.service = new AtividadeEnsinoService();
     }
 
-    async criar(req, res, next) {
+    criar = async (req, res, next) => {
         try {
-            const atividade = await this.atividadeEnsinoService.criar(req.body);
+            const atividade = await this.service.criar(req.body);
 
-            return res.status(201).json(atividade);
+            return res.status(201).json({
+                data: atividade
+            });
         } catch (error) {
             return next(error);
         }
     };
 
-    async listar(req, res, next) {
+    listar = async (req, res, next) => {
         try {
-            const atividades = await this.atividadeEnsinoService.listar();
+            const atividades = await this.service.listar();
 
-            return res.status(200).json(atividades);
+            return res.status(200).json({
+                data: atividades
+            });
         } catch (error) {
             return next(error);
         }
     };
 
-    async buscarPorId(req, res, next) {
+    buscarPorId = async (req, res, next) => {
         try {
-            const atividade = await this.atividadeEnsinoService.buscarPorId(
+            const atividade = await this.service.buscarPorId(
                 Number(req.params.id)
             );
 
-            return res.status(200).json(atividade);
+            return res.status(200).json({
+                data: atividade
+            });
         } catch (error) {
             return next(error);
         }
     };
 
-    async atualizar(req, res, next) {
+    atualizar = async (req, res, next) => {
         try {
-            const atividade = await this.atividadeEnsinoService.atualizar(
+            const atividade = await this.service.atualizar(
                 Number(req.params.id),
                 req.body
             );
 
-            return res.status(200).json(atividade);
+            return res.status(200).json({
+                data: atividade
+            });
         } catch (error) {
             return next(error);
         }
     };
 
-    async excluir(req, res, next) {
+    excluir = async (req, res, next) => {
         try {
-            await this.atividadeEnsinoService.excluir(
-                Number(req.params.id)
-            );
+            await this.service.excluir(Number(req.params.id));
 
             return res.status(204).send();
         } catch (error) {
