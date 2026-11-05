@@ -23,6 +23,7 @@ import {
   Importacao,
   Processamento,
   sequelize,
+  Periodo,
 } from "../src/database/index.js";
 
 let server;
@@ -1046,5 +1047,1500 @@ describe("GET /api/v1/atividades-ensino/:id", () => {
 
     expect(response.status).toBe(400);
     expect(body.error.code).toBe("VALIDATION_ERROR");
+  });
+});
+
+describe("PATCH /api/v1/atividades-ensino/:id", () => {
+  test("atualiza uma atividade de ensino existente", async () => {
+    const instituicao = await Instituicao.create({
+      nome: `Instituição ${randomUUID()}`,
+      sigla: `INS-${randomUUID().slice(0, 6)}`,
+    });
+
+    instituicaoIdCriada = instituicao.id;
+
+    const programa = await Programa.create({
+      instituicao_id: instituicao.id,
+      nome: `Programa ${randomUUID()}`,
+      sigla: `PRO-${randomUUID().slice(0, 6)}`,
+    });
+
+    programaIdCriado = programa.id;
+
+    const pessoa = await Pessoa.create({
+      nome_completo: `Pessoa ${randomUUID()}`,
+      lattes_id: randomUUID(),
+    });
+
+    pessoaIdCriada = pessoa.id;
+
+    const docente = await Docente.create({
+      pessoa_id: pessoa.id,
+      programa_id: programa.id,
+      categoria: "Permanente",
+      ativo: 1,
+    });
+
+    docenteIdCriado = docente.id;
+
+    const atividade = await AtividadeEnsino.create({
+      docente_id: docente.id,
+      tipo: "Disciplina",
+      disciplina: "Banco de Dados",
+      nivel: "Mestrado",
+      descricao: "Disciplina de Banco de Dados",
+    });
+
+    atividadeEnsinoIdCriada = atividade.id;
+
+    const response = await fetch(
+      `${baseUrl}/api/v1/atividades-ensino/${atividade.id}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          disciplina: "Engenharia de Software",
+          nivel: "Doutorado",
+          descricao: "Nova descrição",
+        }),
+      },
+    );
+
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+
+    expect(body.data.id).toBe(atividade.id);
+    expect(body.data.docente_id).toBe(docente.id);
+    expect(body.data.tipo).toBe("Disciplina");
+    expect(body.data.disciplina).toBe("Engenharia de Software");
+    expect(body.data.nivel).toBe("Doutorado");
+    expect(body.data.descricao).toBe("Nova descrição");
+  });
+
+  test("retorna 404 quando a atividade de ensino não existe", async () => {
+    const response = await fetch(`${baseUrl}/api/v1/atividades-ensino/999999`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        disciplina: "Nova Disciplina",
+      }),
+    });
+
+    const body = await response.json();
+
+    expect(response.status).toBe(404);
+    expect(body.error.code).toBe("ATIVIDADE_ENSINO_NOT_FOUND");
+  });
+
+  test("retorna 400 quando o id é inválido", async () => {
+    const response = await fetch(`${baseUrl}/api/v1/atividades-ensino/0`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        disciplina: "Nova Disciplina",
+      }),
+    });
+
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.error.code).toBe("VALIDATION_ERROR");
+  });
+
+  test("retorna 400 quando o id é negativo", async () => {
+    const response = await fetch(`${baseUrl}/api/v1/atividades-ensino/-1`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        disciplina: "Nova Disciplina",
+      }),
+    });
+
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.error.code).toBe("VALIDATION_ERROR");
+  });
+
+  test("retorna 400 quando o id não é inteiro", async () => {
+    const response = await fetch(`${baseUrl}/api/v1/atividades-ensino/1.5`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        disciplina: "Nova Disciplina",
+      }),
+    });
+
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.error.code).toBe("VALIDATION_ERROR");
+  });
+
+  test("retorna 400 quando nenhum campo válido é informado", async () => {
+    const instituicao = await Instituicao.create({
+      nome: `Instituição ${randomUUID()}`,
+      sigla: `INS-${randomUUID().slice(0, 6)}`,
+    });
+
+    instituicaoIdCriada = instituicao.id;
+
+    const programa = await Programa.create({
+      instituicao_id: instituicao.id,
+      nome: `Programa ${randomUUID()}`,
+      sigla: `PRO-${randomUUID().slice(0, 6)}`,
+    });
+
+    programaIdCriado = programa.id;
+
+    const pessoa = await Pessoa.create({
+      nome_completo: `Pessoa ${randomUUID()}`,
+      lattes_id: randomUUID(),
+    });
+
+    pessoaIdCriada = pessoa.id;
+
+    const docente = await Docente.create({
+      pessoa_id: pessoa.id,
+      programa_id: programa.id,
+      categoria: "Permanente",
+      ativo: 1,
+    });
+
+    docenteIdCriado = docente.id;
+
+    const atividade = await AtividadeEnsino.create({
+      docente_id: docente.id,
+      tipo: "Disciplina",
+    });
+
+    atividadeEnsinoIdCriada = atividade.id;
+
+    const response = await fetch(
+      `${baseUrl}/api/v1/atividades-ensino/${atividade.id}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({}),
+      },
+    );
+
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.error.code).toBe("VALIDATION_ERROR");
+  });
+
+  test("retorna 400 quando o tipo está vazio", async () => {
+    const instituicao = await Instituicao.create({
+      nome: `Instituição ${randomUUID()}`,
+      sigla: `INS-${randomUUID().slice(0, 6)}`,
+    });
+
+    instituicaoIdCriada = instituicao.id;
+
+    const programa = await Programa.create({
+      instituicao_id: instituicao.id,
+      nome: `Programa ${randomUUID()}`,
+      sigla: `PRO-${randomUUID().slice(0, 6)}`,
+    });
+
+    programaIdCriado = programa.id;
+
+    const pessoa = await Pessoa.create({
+      nome_completo: `Pessoa ${randomUUID()}`,
+      lattes_id: randomUUID(),
+    });
+
+    pessoaIdCriada = pessoa.id;
+
+    const docente = await Docente.create({
+      pessoa_id: pessoa.id,
+      programa_id: programa.id,
+      categoria: "Permanente",
+      ativo: 1,
+    });
+
+    docenteIdCriado = docente.id;
+
+    const atividade = await AtividadeEnsino.create({
+      docente_id: docente.id,
+      tipo: "Disciplina",
+    });
+
+    atividadeEnsinoIdCriada = atividade.id;
+
+    const response = await fetch(
+      `${baseUrl}/api/v1/atividades-ensino/${atividade.id}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          tipo: "   ",
+        }),
+      },
+    );
+
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.error.code).toBe("VALIDATION_ERROR");
+  });
+
+  test("atualiza o docente_id da atividade de ensino", async () => {
+    const instituicao = await Instituicao.create({
+      nome: `Instituição ${randomUUID()}`,
+      sigla: `INS-${randomUUID().slice(0, 6)}`,
+    });
+
+    instituicaoIdCriada = instituicao.id;
+
+    const programa = await Programa.create({
+      instituicao_id: instituicao.id,
+      nome: `Programa ${randomUUID()}`,
+      sigla: `PRO-${randomUUID().slice(0, 6)}`,
+    });
+
+    programaIdCriado = programa.id;
+
+    const pessoa1 = await Pessoa.create({
+      nome_completo: `Pessoa ${randomUUID()}`,
+      lattes_id: randomUUID(),
+    });
+
+    pessoaIdCriada = pessoa1.id;
+
+    const docente1 = await Docente.create({
+      pessoa_id: pessoa1.id,
+      programa_id: programa.id,
+      categoria: "Permanente",
+      ativo: 1,
+    });
+
+    docenteIdCriado = docente1.id;
+
+    const pessoa2 = await Pessoa.create({
+      nome_completo: `Pessoa ${randomUUID()}`,
+      lattes_id: randomUUID(),
+    });
+
+    const docente2 = await Docente.create({
+      pessoa_id: pessoa2.id,
+      programa_id: programa.id,
+      categoria: "Colaborador",
+      ativo: 1,
+    });
+
+    const atividade = await AtividadeEnsino.create({
+      docente_id: docente1.id,
+      tipo: "Disciplina",
+      disciplina: "Banco de Dados",
+    });
+
+    atividadeEnsinoIdCriada = atividade.id;
+
+    const response = await fetch(
+      `${baseUrl}/api/v1/atividades-ensino/${atividade.id}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          docente_id: docente2.id,
+        }),
+      },
+    );
+
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.data.id).toBe(atividade.id);
+    expect(body.data.docente_id).toBe(docente2.id);
+
+    await Docente.destroy({
+      where: {
+        id: docente2.id,
+      },
+    });
+
+    await Pessoa.destroy({
+      where: {
+        id: pessoa2.id,
+      },
+    });
+  });
+
+  test("retorna 404 quando o docente_id não existe", async () => {
+    const instituicao = await Instituicao.create({
+      nome: `Instituição ${randomUUID()}`,
+      sigla: `INS-${randomUUID().slice(0, 6)}`,
+    });
+
+    instituicaoIdCriada = instituicao.id;
+
+    const programa = await Programa.create({
+      instituicao_id: instituicao.id,
+      nome: `Programa ${randomUUID()}`,
+      sigla: `PRO-${randomUUID().slice(0, 6)}`,
+    });
+
+    programaIdCriado = programa.id;
+
+    const pessoa = await Pessoa.create({
+      nome_completo: `Pessoa ${randomUUID()}`,
+      lattes_id: randomUUID(),
+    });
+
+    pessoaIdCriada = pessoa.id;
+
+    const docente = await Docente.create({
+      pessoa_id: pessoa.id,
+      programa_id: programa.id,
+      categoria: "Permanente",
+      ativo: 1,
+    });
+
+    docenteIdCriado = docente.id;
+
+    const atividade = await AtividadeEnsino.create({
+      docente_id: docente.id,
+      tipo: "Disciplina",
+    });
+
+    atividadeEnsinoIdCriada = atividade.id;
+
+    const response = await fetch(
+      `${baseUrl}/api/v1/atividades-ensino/${atividade.id}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          docente_id: 999999,
+        }),
+      },
+    );
+
+    const body = await response.json();
+
+    expect(response.status).toBe(404);
+    expect(body.error.code).toBe("DOCENTE_NOT_FOUND");
+  });
+
+  test("retorna 400 quando o docente_id é zero", async () => {
+    const instituicao = await Instituicao.create({
+      nome: `Instituição ${randomUUID()}`,
+      sigla: `INS-${randomUUID().slice(0, 6)}`,
+    });
+
+    instituicaoIdCriada = instituicao.id;
+
+    const programa = await Programa.create({
+      instituicao_id: instituicao.id,
+      nome: `Programa ${randomUUID()}`,
+      sigla: `PRO-${randomUUID().slice(0, 6)}`,
+    });
+
+    programaIdCriado = programa.id;
+
+    const pessoa = await Pessoa.create({
+      nome_completo: `Pessoa ${randomUUID()}`,
+      lattes_id: randomUUID(),
+    });
+
+    pessoaIdCriada = pessoa.id;
+
+    const docente = await Docente.create({
+      pessoa_id: pessoa.id,
+      programa_id: programa.id,
+      categoria: "Permanente",
+      ativo: 1,
+    });
+
+    docenteIdCriado = docente.id;
+
+    const atividade = await AtividadeEnsino.create({
+      docente_id: docente.id,
+      tipo: "Disciplina",
+    });
+
+    atividadeEnsinoIdCriada = atividade.id;
+
+    const response = await fetch(
+      `${baseUrl}/api/v1/atividades-ensino/${atividade.id}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          docente_id: 0,
+        }),
+      },
+    );
+
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.error.code).toBe("VALIDATION_ERROR");
+  });
+
+  test("retorna 400 quando o docente_id é negativo", async () => {
+    const instituicao = await Instituicao.create({
+      nome: `Instituição ${randomUUID()}`,
+      sigla: `INS-${randomUUID().slice(0, 6)}`,
+    });
+
+    instituicaoIdCriada = instituicao.id;
+
+    const programa = await Programa.create({
+      instituicao_id: instituicao.id,
+      nome: `Programa ${randomUUID()}`,
+      sigla: `PRO-${randomUUID().slice(0, 6)}`,
+    });
+
+    programaIdCriado = programa.id;
+
+    const pessoa = await Pessoa.create({
+      nome_completo: `Pessoa ${randomUUID()}`,
+      lattes_id: randomUUID(),
+    });
+
+    pessoaIdCriada = pessoa.id;
+
+    const docente = await Docente.create({
+      pessoa_id: pessoa.id,
+      programa_id: programa.id,
+      categoria: "Permanente",
+      ativo: 1,
+    });
+
+    docenteIdCriado = docente.id;
+
+    const atividade = await AtividadeEnsino.create({
+      docente_id: docente.id,
+      tipo: "Disciplina",
+    });
+
+    atividadeEnsinoIdCriada = atividade.id;
+
+    const response = await fetch(
+      `${baseUrl}/api/v1/atividades-ensino/${atividade.id}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          docente_id: -1,
+        }),
+      },
+    );
+
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.error.code).toBe("VALIDATION_ERROR");
+  });
+
+  test("retorna 400 quando o docente_id é decimal", async () => {
+    const instituicao = await Instituicao.create({
+      nome: `Instituição ${randomUUID()}`,
+      sigla: `INS-${randomUUID().slice(0, 6)}`,
+    });
+
+    instituicaoIdCriada = instituicao.id;
+
+    const programa = await Programa.create({
+      instituicao_id: instituicao.id,
+      nome: `Programa ${randomUUID()}`,
+      sigla: `PRO-${randomUUID().slice(0, 6)}`,
+    });
+
+    programaIdCriado = programa.id;
+
+    const pessoa = await Pessoa.create({
+      nome_completo: `Pessoa ${randomUUID()}`,
+      lattes_id: randomUUID(),
+    });
+
+    pessoaIdCriada = pessoa.id;
+
+    const docente = await Docente.create({
+      pessoa_id: pessoa.id,
+      programa_id: programa.id,
+      categoria: "Permanente",
+      ativo: 1,
+    });
+
+    docenteIdCriado = docente.id;
+
+    const atividade = await AtividadeEnsino.create({
+      docente_id: docente.id,
+      tipo: "Disciplina",
+    });
+
+    atividadeEnsinoIdCriada = atividade.id;
+
+    const response = await fetch(
+      `${baseUrl}/api/v1/atividades-ensino/${atividade.id}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          docente_id: 1.5,
+        }),
+      },
+    );
+
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.error.code).toBe("VALIDATION_ERROR");
+  });
+
+  test("atualiza o periodo_id da atividade de ensino", async () => {
+    const instituicao = await Instituicao.create({
+      nome: `Instituição ${randomUUID()}`,
+      sigla: `INS-${randomUUID().slice(0, 6)}`,
+    });
+
+    instituicaoIdCriada = instituicao.id;
+
+    const programa = await Programa.create({
+      instituicao_id: instituicao.id,
+      nome: `Programa ${randomUUID()}`,
+      sigla: `PRO-${randomUUID().slice(0, 6)}`,
+    });
+
+    programaIdCriado = programa.id;
+
+    const pessoa = await Pessoa.create({
+      nome_completo: `Pessoa ${randomUUID()}`,
+      lattes_id: randomUUID(),
+    });
+
+    pessoaIdCriada = pessoa.id;
+
+    const docente = await Docente.create({
+      pessoa_id: pessoa.id,
+      programa_id: programa.id,
+      categoria: "Permanente",
+      ativo: 1,
+    });
+
+    docenteIdCriado = docente.id;
+
+    const atividade = await AtividadeEnsino.create({
+      docente_id: docente.id,
+      tipo: "Disciplina",
+    });
+
+    atividadeEnsinoIdCriada = atividade.id;
+
+    const periodo = await Periodo.create({
+      ano: 2026,
+      semestre: 1,
+    });
+
+    const response = await fetch(
+      `${baseUrl}/api/v1/atividades-ensino/${atividade.id}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          periodo_id: periodo.id,
+        }),
+      },
+    );
+
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.data.id).toBe(atividade.id);
+    expect(body.data.periodo_id).toBe(periodo.id);
+
+    await Periodo.destroy({
+      where: {
+        id: periodo.id,
+      },
+    });
+  });
+
+  test("retorna 404 quando o periodo_id não existe", async () => {
+    const instituicao = await Instituicao.create({
+      nome: `Instituição ${randomUUID()}`,
+      sigla: `INS-${randomUUID().slice(0, 6)}`,
+    });
+
+    instituicaoIdCriada = instituicao.id;
+
+    const programa = await Programa.create({
+      instituicao_id: instituicao.id,
+      nome: `Programa ${randomUUID()}`,
+      sigla: `PRO-${randomUUID().slice(0, 6)}`,
+    });
+
+    programaIdCriado = programa.id;
+
+    const pessoa = await Pessoa.create({
+      nome_completo: `Pessoa ${randomUUID()}`,
+      lattes_id: randomUUID(),
+    });
+
+    pessoaIdCriada = pessoa.id;
+
+    const docente = await Docente.create({
+      pessoa_id: pessoa.id,
+      programa_id: programa.id,
+      categoria: "Permanente",
+      ativo: 1,
+    });
+
+    docenteIdCriado = docente.id;
+
+    const atividade = await AtividadeEnsino.create({
+      docente_id: docente.id,
+      tipo: "Disciplina",
+    });
+
+    atividadeEnsinoIdCriada = atividade.id;
+
+    const response = await fetch(
+      `${baseUrl}/api/v1/atividades-ensino/${atividade.id}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          periodo_id: 999999,
+        }),
+      },
+    );
+
+    const body = await response.json();
+
+    expect(response.status).toBe(404);
+    expect(body.error.code).toBe("PERIODO_NOT_FOUND");
+  });
+
+  test("retorna 400 quando o periodo_id é zero", async () => {
+    const instituicao = await Instituicao.create({
+      nome: `Instituição ${randomUUID()}`,
+      sigla: `INS-${randomUUID().slice(0, 6)}`,
+    });
+
+    instituicaoIdCriada = instituicao.id;
+
+    const programa = await Programa.create({
+      instituicao_id: instituicao.id,
+      nome: `Programa ${randomUUID()}`,
+      sigla: `PRO-${randomUUID().slice(0, 6)}`,
+    });
+
+    programaIdCriado = programa.id;
+
+    const pessoa = await Pessoa.create({
+      nome_completo: `Pessoa ${randomUUID()}`,
+      lattes_id: randomUUID(),
+    });
+
+    pessoaIdCriada = pessoa.id;
+
+    const docente = await Docente.create({
+      pessoa_id: pessoa.id,
+      programa_id: programa.id,
+      categoria: "Permanente",
+      ativo: 1,
+    });
+
+    docenteIdCriado = docente.id;
+
+    const atividade = await AtividadeEnsino.create({
+      docente_id: docente.id,
+      tipo: "Disciplina",
+    });
+
+    atividadeEnsinoIdCriada = atividade.id;
+
+    const response = await fetch(
+      `${baseUrl}/api/v1/atividades-ensino/${atividade.id}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          periodo_id: 0,
+        }),
+      },
+    );
+
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.error.code).toBe("VALIDATION_ERROR");
+  });
+
+  test("retorna 400 quando o periodo_id é negativo", async () => {
+    const instituicao = await Instituicao.create({
+      nome: `Instituição ${randomUUID()}`,
+      sigla: `INS-${randomUUID().slice(0, 6)}`,
+    });
+
+    instituicaoIdCriada = instituicao.id;
+
+    const programa = await Programa.create({
+      instituicao_id: instituicao.id,
+      nome: `Programa ${randomUUID()}`,
+      sigla: `PRO-${randomUUID().slice(0, 6)}`,
+    });
+
+    programaIdCriado = programa.id;
+
+    const pessoa = await Pessoa.create({
+      nome_completo: `Pessoa ${randomUUID()}`,
+      lattes_id: randomUUID(),
+    });
+
+    pessoaIdCriada = pessoa.id;
+
+    const docente = await Docente.create({
+      pessoa_id: pessoa.id,
+      programa_id: programa.id,
+      categoria: "Permanente",
+      ativo: 1,
+    });
+
+    docenteIdCriado = docente.id;
+
+    const atividade = await AtividadeEnsino.create({
+      docente_id: docente.id,
+      tipo: "Disciplina",
+    });
+
+    atividadeEnsinoIdCriada = atividade.id;
+
+    const response = await fetch(
+      `${baseUrl}/api/v1/atividades-ensino/${atividade.id}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          periodo_id: -1,
+        }),
+      },
+    );
+
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.error.code).toBe("VALIDATION_ERROR");
+  });
+
+  test("retorna 400 quando o periodo_id é decimal", async () => {
+    const instituicao = await Instituicao.create({
+      nome: `Instituição ${randomUUID()}`,
+      sigla: `INS-${randomUUID().slice(0, 6)}`,
+    });
+
+    instituicaoIdCriada = instituicao.id;
+
+    const programa = await Programa.create({
+      instituicao_id: instituicao.id,
+      nome: `Programa ${randomUUID()}`,
+      sigla: `PRO-${randomUUID().slice(0, 6)}`,
+    });
+
+    programaIdCriado = programa.id;
+
+    const pessoa = await Pessoa.create({
+      nome_completo: `Pessoa ${randomUUID()}`,
+      lattes_id: randomUUID(),
+    });
+
+    pessoaIdCriada = pessoa.id;
+
+    const docente = await Docente.create({
+      pessoa_id: pessoa.id,
+      programa_id: programa.id,
+      categoria: "Permanente",
+      ativo: 1,
+    });
+
+    docenteIdCriado = docente.id;
+
+    const atividade = await AtividadeEnsino.create({
+      docente_id: docente.id,
+      tipo: "Disciplina",
+    });
+
+    atividadeEnsinoIdCriada = atividade.id;
+
+    const response = await fetch(
+      `${baseUrl}/api/v1/atividades-ensino/${atividade.id}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          periodo_id: 1.5,
+        }),
+      },
+    );
+
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.error.code).toBe("VALIDATION_ERROR");
+  });
+
+  test("atualiza o processamento_id da atividade de ensino", async () => {
+    const instituicao = await Instituicao.create({
+      nome: `Instituição ${randomUUID()}`,
+      sigla: `INS-${randomUUID().slice(0, 6)}`,
+    });
+
+    instituicaoIdCriada = instituicao.id;
+
+    const programa = await Programa.create({
+      instituicao_id: instituicao.id,
+      nome: `Programa ${randomUUID()}`,
+      sigla: `PRO-${randomUUID().slice(0, 6)}`,
+    });
+
+    programaIdCriado = programa.id;
+
+    const pessoa = await Pessoa.create({
+      nome_completo: `Pessoa ${randomUUID()}`,
+      lattes_id: randomUUID(),
+    });
+
+    pessoaIdCriada = pessoa.id;
+
+    const docente = await Docente.create({
+      pessoa_id: pessoa.id,
+      programa_id: programa.id,
+      categoria: "Permanente",
+      ativo: 1,
+    });
+
+    docenteIdCriado = docente.id;
+
+    const parserVersao = await ParserVersao.create({
+      versao: `1.0.${randomUUID().slice(0, 6)}`,
+      criado_em: new Date().toISOString(),
+      descricao: "Versão de teste",
+    });
+
+    const importacao = await Importacao.create({
+      docente_id: docente.id,
+      nome_arquivo_original: "curriculo.pdf",
+      hash_arquivo: randomUUID(),
+      data_importacao: new Date().toISOString(),
+      status: "PROCESSANDO",
+    });
+
+    const processamento = await Processamento.create({
+      importacao_id: importacao.id,
+      parser_versao_id: parserVersao.id,
+      iniciado_em: new Date().toISOString(),
+      status: "PROCESSANDO",
+      registros_processados: 0,
+      erros: 0,
+      alertas: 0,
+    });
+
+    processamentoIdCriado = processamento.id;
+
+    const atividade = await AtividadeEnsino.create({
+      docente_id: docente.id,
+      tipo: "Disciplina",
+    });
+
+    atividadeEnsinoIdCriada = atividade.id;
+
+    const response = await fetch(
+      `${baseUrl}/api/v1/atividades-ensino/${atividade.id}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          processamento_id: processamento.id,
+        }),
+      },
+    );
+
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.data.id).toBe(atividade.id);
+    expect(body.data.processamento_id).toBe(processamento.id);
+  });
+
+  test("retorna 404 quando o processamento_id não existe", async () => {
+    const instituicao = await Instituicao.create({
+      nome: `Instituição ${randomUUID()}`,
+      sigla: `INS-${randomUUID().slice(0, 6)}`,
+    });
+
+    instituicaoIdCriada = instituicao.id;
+
+    const programa = await Programa.create({
+      instituicao_id: instituicao.id,
+      nome: `Programa ${randomUUID()}`,
+      sigla: `PRO-${randomUUID().slice(0, 6)}`,
+    });
+
+    programaIdCriado = programa.id;
+
+    const pessoa = await Pessoa.create({
+      nome_completo: `Pessoa ${randomUUID()}`,
+      lattes_id: randomUUID(),
+    });
+
+    pessoaIdCriada = pessoa.id;
+
+    const docente = await Docente.create({
+      pessoa_id: pessoa.id,
+      programa_id: programa.id,
+      categoria: "Permanente",
+      ativo: 1,
+    });
+
+    docenteIdCriado = docente.id;
+
+    const atividade = await AtividadeEnsino.create({
+      docente_id: docente.id,
+      tipo: "Disciplina",
+    });
+
+    atividadeEnsinoIdCriada = atividade.id;
+
+    const response = await fetch(
+      `${baseUrl}/api/v1/atividades-ensino/${atividade.id}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          processamento_id: 999999,
+        }),
+      },
+    );
+
+    const body = await response.json();
+
+    expect(response.status).toBe(404);
+    expect(body.error.code).toBe("PROCESSAMENTO_NOT_FOUND");
+  });
+
+  test("retorna 400 quando o processamento_id é zero", async () => {
+    const instituicao = await Instituicao.create({
+      nome: `Instituição ${randomUUID()}`,
+      sigla: `INS-${randomUUID().slice(0, 6)}`,
+    });
+
+    instituicaoIdCriada = instituicao.id;
+
+    const programa = await Programa.create({
+      instituicao_id: instituicao.id,
+      nome: `Programa ${randomUUID()}`,
+      sigla: `PRO-${randomUUID().slice(0, 6)}`,
+    });
+
+    programaIdCriado = programa.id;
+
+    const pessoa = await Pessoa.create({
+      nome_completo: `Pessoa ${randomUUID()}`,
+      lattes_id: randomUUID(),
+    });
+
+    pessoaIdCriada = pessoa.id;
+
+    const docente = await Docente.create({
+      pessoa_id: pessoa.id,
+      programa_id: programa.id,
+      categoria: "Permanente",
+      ativo: 1,
+    });
+
+    docenteIdCriado = docente.id;
+
+    const atividade = await AtividadeEnsino.create({
+      docente_id: docente.id,
+      tipo: "Disciplina",
+    });
+
+    atividadeEnsinoIdCriada = atividade.id;
+
+    const response = await fetch(
+      `${baseUrl}/api/v1/atividades-ensino/${atividade.id}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          processamento_id: 0,
+        }),
+      },
+    );
+
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.error.code).toBe("VALIDATION_ERROR");
+  });
+
+  test("retorna 400 quando o processamento_id é negativo", async () => {
+    const instituicao = await Instituicao.create({
+      nome: `Instituição ${randomUUID()}`,
+      sigla: `INS-${randomUUID().slice(0, 6)}`,
+    });
+
+    instituicaoIdCriada = instituicao.id;
+
+    const programa = await Programa.create({
+      instituicao_id: instituicao.id,
+      nome: `Programa ${randomUUID()}`,
+      sigla: `PRO-${randomUUID().slice(0, 6)}`,
+    });
+
+    programaIdCriado = programa.id;
+
+    const pessoa = await Pessoa.create({
+      nome_completo: `Pessoa ${randomUUID()}`,
+      lattes_id: randomUUID(),
+    });
+
+    pessoaIdCriada = pessoa.id;
+
+    const docente = await Docente.create({
+      pessoa_id: pessoa.id,
+      programa_id: programa.id,
+      categoria: "Permanente",
+      ativo: 1,
+    });
+
+    docenteIdCriado = docente.id;
+
+    const atividade = await AtividadeEnsino.create({
+      docente_id: docente.id,
+      tipo: "Disciplina",
+    });
+
+    atividadeEnsinoIdCriada = atividade.id;
+
+    const response = await fetch(
+      `${baseUrl}/api/v1/atividades-ensino/${atividade.id}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          processamento_id: -1,
+        }),
+      },
+    );
+
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.error.code).toBe("VALIDATION_ERROR");
+  });
+
+  test("retorna 400 quando o processamento_id é decimal", async () => {
+    const instituicao = await Instituicao.create({
+      nome: `Instituição ${randomUUID()}`,
+      sigla: `INS-${randomUUID().slice(0, 6)}`,
+    });
+
+    instituicaoIdCriada = instituicao.id;
+
+    const programa = await Programa.create({
+      instituicao_id: instituicao.id,
+      nome: `Programa ${randomUUID()}`,
+      sigla: `PRO-${randomUUID().slice(0, 6)}`,
+    });
+
+    programaIdCriado = programa.id;
+
+    const pessoa = await Pessoa.create({
+      nome_completo: `Pessoa ${randomUUID()}`,
+      lattes_id: randomUUID(),
+    });
+
+    pessoaIdCriada = pessoa.id;
+
+    const docente = await Docente.create({
+      pessoa_id: pessoa.id,
+      programa_id: programa.id,
+      categoria: "Permanente",
+      ativo: 1,
+    });
+
+    docenteIdCriado = docente.id;
+
+    const atividade = await AtividadeEnsino.create({
+      docente_id: docente.id,
+      tipo: "Disciplina",
+    });
+
+    atividadeEnsinoIdCriada = atividade.id;
+
+    const response = await fetch(
+      `${baseUrl}/api/v1/atividades-ensino/${atividade.id}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          processamento_id: 1.5,
+        }),
+      },
+    );
+
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.error.code).toBe("VALIDATION_ERROR");
+  });
+
+  test("atualiza a disciplina da atividade de ensino", async () => {
+    const instituicao = await Instituicao.create({
+      nome: `Instituição ${randomUUID()}`,
+      sigla: `INS-${randomUUID().slice(0, 6)}`,
+    });
+
+    instituicaoIdCriada = instituicao.id;
+
+    const programa = await Programa.create({
+      instituicao_id: instituicao.id,
+      nome: `Programa ${randomUUID()}`,
+      sigla: `PRO-${randomUUID().slice(0, 6)}`,
+    });
+
+    programaIdCriado = programa.id;
+
+    const pessoa = await Pessoa.create({
+      nome_completo: `Pessoa ${randomUUID()}`,
+      lattes_id: randomUUID(),
+    });
+
+    pessoaIdCriada = pessoa.id;
+
+    const docente = await Docente.create({
+      pessoa_id: pessoa.id,
+      programa_id: programa.id,
+      categoria: "Permanente",
+      ativo: 1,
+    });
+
+    docenteIdCriado = docente.id;
+
+    const atividade = await AtividadeEnsino.create({
+      docente_id: docente.id,
+      tipo: "Disciplina",
+      disciplina: "Banco de Dados",
+    });
+
+    atividadeEnsinoIdCriada = atividade.id;
+
+    const response = await fetch(
+      `${baseUrl}/api/v1/atividades-ensino/${atividade.id}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          disciplina: "Engenharia de Software",
+        }),
+      },
+    );
+
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.data.id).toBe(atividade.id);
+    expect(body.data.disciplina).toBe("Engenharia de Software");
+  });
+
+  test("atualiza o nivel da atividade de ensino", async () => {
+    const instituicao = await Instituicao.create({
+      nome: `Instituição ${randomUUID()}`,
+      sigla: `INS-${randomUUID().slice(0, 6)}`,
+    });
+
+    instituicaoIdCriada = instituicao.id;
+
+    const programa = await Programa.create({
+      instituicao_id: instituicao.id,
+      nome: `Programa ${randomUUID()}`,
+      sigla: `PRO-${randomUUID().slice(0, 6)}`,
+    });
+
+    programaIdCriado = programa.id;
+
+    const pessoa = await Pessoa.create({
+      nome_completo: `Pessoa ${randomUUID()}`,
+      lattes_id: randomUUID(),
+    });
+
+    pessoaIdCriada = pessoa.id;
+
+    const docente = await Docente.create({
+      pessoa_id: pessoa.id,
+      programa_id: programa.id,
+      categoria: "Permanente",
+      ativo: 1,
+    });
+
+    docenteIdCriado = docente.id;
+
+    const atividade = await AtividadeEnsino.create({
+      docente_id: docente.id,
+      tipo: "Disciplina",
+      nivel: "Graduação",
+    });
+
+    atividadeEnsinoIdCriada = atividade.id;
+
+    const response = await fetch(
+      `${baseUrl}/api/v1/atividades-ensino/${atividade.id}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          nivel: "Pós-graduação",
+        }),
+      },
+    );
+
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.data.id).toBe(atividade.id);
+    expect(body.data.nivel).toBe("Pós-graduação");
+  });
+
+  test("atualiza a descricao da atividade de ensino", async () => {
+    const instituicao = await Instituicao.create({
+      nome: `Instituição ${randomUUID()}`,
+      sigla: `INS-${randomUUID().slice(0, 6)}`,
+    });
+
+    instituicaoIdCriada = instituicao.id;
+
+    const programa = await Programa.create({
+      instituicao_id: instituicao.id,
+      nome: `Programa ${randomUUID()}`,
+      sigla: `PRO-${randomUUID().slice(0, 6)}`,
+    });
+
+    programaIdCriado = programa.id;
+
+    const pessoa = await Pessoa.create({
+      nome_completo: `Pessoa ${randomUUID()}`,
+      lattes_id: randomUUID(),
+    });
+
+    pessoaIdCriada = pessoa.id;
+
+    const docente = await Docente.create({
+      pessoa_id: pessoa.id,
+      programa_id: programa.id,
+      categoria: "Permanente",
+      ativo: 1,
+    });
+
+    docenteIdCriado = docente.id;
+
+    const atividade = await AtividadeEnsino.create({
+      docente_id: docente.id,
+      tipo: "Disciplina",
+      descricao: "Descrição original",
+    });
+
+    atividadeEnsinoIdCriada = atividade.id;
+
+    const response = await fetch(
+      `${baseUrl}/api/v1/atividades-ensino/${atividade.id}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          descricao: "Nova descrição da atividade",
+        }),
+      },
+    );
+
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.data.id).toBe(atividade.id);
+    expect(body.data.descricao).toBe("Nova descrição da atividade");
+  });
+
+  test("atualiza o tipo da atividade de ensino", async () => {
+    const instituicao = await Instituicao.create({
+      nome: `Instituição ${randomUUID()}`,
+      sigla: `INS-${randomUUID().slice(0, 6)}`,
+    });
+
+    instituicaoIdCriada = instituicao.id;
+
+    const programa = await Programa.create({
+      instituicao_id: instituicao.id,
+      nome: `Programa ${randomUUID()}`,
+      sigla: `PRO-${randomUUID().slice(0, 6)}`,
+    });
+
+    programaIdCriado = programa.id;
+
+    const pessoa = await Pessoa.create({
+      nome_completo: `Pessoa ${randomUUID()}`,
+      lattes_id: randomUUID(),
+    });
+
+    pessoaIdCriada = pessoa.id;
+
+    const docente = await Docente.create({
+      pessoa_id: pessoa.id,
+      programa_id: programa.id,
+      categoria: "Permanente",
+      ativo: 1,
+    });
+
+    docenteIdCriado = docente.id;
+
+    const atividade = await AtividadeEnsino.create({
+      docente_id: docente.id,
+      tipo: "Disciplina",
+    });
+
+    atividadeEnsinoIdCriada = atividade.id;
+
+    const response = await fetch(
+      `${baseUrl}/api/v1/atividades-ensino/${atividade.id}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          tipo: "Monitoria",
+        }),
+      },
+    );
+
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.data.id).toBe(atividade.id);
+    expect(body.data.tipo).toBe("Monitoria");
+  });
+
+  test("atualiza vários campos da atividade de ensino", async () => {
+    const instituicao = await Instituicao.create({
+      nome: `Instituição ${randomUUID()}`,
+      sigla: `INS-${randomUUID().slice(0, 6)}`,
+    });
+
+    instituicaoIdCriada = instituicao.id;
+
+    const programa = await Programa.create({
+      instituicao_id: instituicao.id,
+      nome: `Programa ${randomUUID()}`,
+      sigla: `PRO-${randomUUID().slice(0, 6)}`,
+    });
+
+    programaIdCriado = programa.id;
+
+    const pessoa = await Pessoa.create({
+      nome_completo: `Pessoa ${randomUUID()}`,
+      lattes_id: randomUUID(),
+    });
+
+    pessoaIdCriada = pessoa.id;
+
+    const docente = await Docente.create({
+      pessoa_id: pessoa.id,
+      programa_id: programa.id,
+      categoria: "Permanente",
+      ativo: 1,
+    });
+
+    docenteIdCriado = docente.id;
+
+    const atividade = await AtividadeEnsino.create({
+      docente_id: docente.id,
+      tipo: "Disciplina",
+      disciplina: "Banco de Dados",
+      nivel: "Graduação",
+      descricao: "Descrição original",
+    });
+
+    atividadeEnsinoIdCriada = atividade.id;
+
+    const response = await fetch(
+      `${baseUrl}/api/v1/atividades-ensino/${atividade.id}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          tipo: "Monitoria",
+          disciplina: "Engenharia de Software",
+          nivel: "Pós-graduação",
+          descricao: "Nova descrição",
+        }),
+      },
+    );
+
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.data.id).toBe(atividade.id);
+    expect(body.data.tipo).toBe("Monitoria");
+    expect(body.data.disciplina).toBe("Engenharia de Software");
+    expect(body.data.nivel).toBe("Pós-graduação");
+    expect(body.data.descricao).toBe("Nova descrição");
   });
 });
