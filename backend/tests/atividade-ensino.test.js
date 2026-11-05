@@ -831,3 +831,220 @@ describe("POST /api/v1/atividades-ensino", () => {
     expect(body.error.code).toBe("VALIDATION_ERROR");
   });
 });
+
+describe("GET /api/v1/atividades-ensino", () => {
+  test("lista as atividades de ensino", async () => {
+    const instituicao = await Instituicao.create({
+      nome: `Instituição ${randomUUID()}`,
+      sigla: `INS-${randomUUID().slice(0, 6)}`,
+    });
+
+    instituicaoIdCriada = instituicao.id;
+
+    const programa = await Programa.create({
+      instituicao_id: instituicao.id,
+      nome: `Programa ${randomUUID()}`,
+      sigla: `PRO-${randomUUID().slice(0, 6)}`,
+    });
+
+    programaIdCriado = programa.id;
+
+    const pessoa = await Pessoa.create({
+      nome_completo: `Pessoa ${randomUUID()}`,
+      lattes_id: randomUUID(),
+    });
+
+    pessoaIdCriada = pessoa.id;
+
+    const docente = await Docente.create({
+      pessoa_id: pessoa.id,
+      programa_id: programa.id,
+      categoria: "Permanente",
+      ativo: 1,
+    });
+
+    docenteIdCriado = docente.id;
+
+    const atividade = await AtividadeEnsino.create({
+      docente_id: docente.id,
+      tipo: "Disciplina",
+      disciplina: "Banco de Dados",
+      nivel: "Mestrado",
+      descricao: "Disciplina de Banco de Dados",
+    });
+
+    atividadeEnsinoIdCriada = atividade.id;
+
+    const response = await fetch(`${baseUrl}/api/v1/atividades-ensino`);
+
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+
+    expect(Array.isArray(body.data)).toBe(true);
+
+    expect(body.data.some((item) => item.id === atividade.id)).toBe(true);
+  });
+
+  test("lista múltiplas atividades de ensino", async () => {
+    const instituicao = await Instituicao.create({
+      nome: `Instituição ${randomUUID()}`,
+      sigla: `INS-${randomUUID().slice(0, 6)}`,
+    });
+
+    instituicaoIdCriada = instituicao.id;
+
+    const programa = await Programa.create({
+      instituicao_id: instituicao.id,
+      nome: `Programa ${randomUUID()}`,
+      sigla: `PRO-${randomUUID().slice(0, 6)}`,
+    });
+
+    programaIdCriado = programa.id;
+
+    const pessoa = await Pessoa.create({
+      nome_completo: `Pessoa ${randomUUID()}`,
+      lattes_id: randomUUID(),
+    });
+
+    pessoaIdCriada = pessoa.id;
+
+    const docente = await Docente.create({
+      pessoa_id: pessoa.id,
+      programa_id: programa.id,
+      categoria: "Permanente",
+      ativo: 1,
+    });
+
+    docenteIdCriado = docente.id;
+
+    const atividade1 = await AtividadeEnsino.create({
+      docente_id: docente.id,
+      tipo: "Disciplina",
+      disciplina: "Banco de Dados",
+      nivel: "Mestrado",
+    });
+
+    const atividade2 = await AtividadeEnsino.create({
+      docente_id: docente.id,
+      tipo: "Orientação",
+      disciplina: "Engenharia de Software",
+      nivel: "Doutorado",
+    });
+
+    atividadeEnsinoIdCriada = atividade1.id;
+
+    const response = await fetch(`${baseUrl}/api/v1/atividades-ensino`);
+
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(Array.isArray(body.data)).toBe(true);
+
+    expect(body.data.some((item) => item.id === atividade1.id)).toBe(true);
+
+    expect(body.data.some((item) => item.id === atividade2.id)).toBe(true);
+
+    await AtividadeEnsino.destroy({
+      where: {
+        id: atividade2.id,
+      },
+    });
+  });
+});
+
+describe("GET /api/v1/atividades-ensino/:id", () => {
+  test("busca uma atividade de ensino existente", async () => {
+    const instituicao = await Instituicao.create({
+      nome: `Instituição ${randomUUID()}`,
+      sigla: `INS-${randomUUID().slice(0, 6)}`,
+    });
+
+    instituicaoIdCriada = instituicao.id;
+
+    const programa = await Programa.create({
+      instituicao_id: instituicao.id,
+      nome: `Programa ${randomUUID()}`,
+      sigla: `PRO-${randomUUID().slice(0, 6)}`,
+    });
+
+    programaIdCriado = programa.id;
+
+    const pessoa = await Pessoa.create({
+      nome_completo: `Pessoa ${randomUUID()}`,
+      lattes_id: randomUUID(),
+    });
+
+    pessoaIdCriada = pessoa.id;
+
+    const docente = await Docente.create({
+      pessoa_id: pessoa.id,
+      programa_id: programa.id,
+      categoria: "Permanente",
+      ativo: 1,
+    });
+
+    docenteIdCriado = docente.id;
+
+    const atividade = await AtividadeEnsino.create({
+      docente_id: docente.id,
+      tipo: "Disciplina",
+      disciplina: "Banco de Dados",
+      nivel: "Mestrado",
+      descricao: "Disciplina de Banco de Dados",
+    });
+
+    atividadeEnsinoIdCriada = atividade.id;
+
+    const response = await fetch(
+      `${baseUrl}/api/v1/atividades-ensino/${atividade.id}`,
+    );
+
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+
+    expect(body.data.id).toBe(atividade.id);
+    expect(body.data.docente_id).toBe(docente.id);
+    expect(body.data.tipo).toBe("Disciplina");
+    expect(body.data.disciplina).toBe("Banco de Dados");
+    expect(body.data.nivel).toBe("Mestrado");
+    expect(body.data.descricao).toBe("Disciplina de Banco de Dados");
+  });
+
+  test("retorna 404 quando a atividade de ensino não existe", async () => {
+    const response = await fetch(`${baseUrl}/api/v1/atividades-ensino/999999`);
+
+    const body = await response.json();
+
+    expect(response.status).toBe(404);
+    expect(body.error.code).toBe("ATIVIDADE_ENSINO_NOT_FOUND");
+  });
+
+  test("retorna 400 quando o id é inválido", async () => {
+    const response = await fetch(`${baseUrl}/api/v1/atividades-ensino/0`);
+
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.error.code).toBe("VALIDATION_ERROR");
+  });
+
+  test("retorna 400 quando o id é negativo", async () => {
+    const response = await fetch(`${baseUrl}/api/v1/atividades-ensino/-1`);
+
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.error.code).toBe("VALIDATION_ERROR");
+  });
+
+  test("retorna 400 quando o id não é inteiro", async () => {
+    const response = await fetch(`${baseUrl}/api/v1/atividades-ensino/1.5`);
+
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.error.code).toBe("VALIDATION_ERROR");
+  });
+});
