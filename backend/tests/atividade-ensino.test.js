@@ -2544,3 +2544,105 @@ describe("PATCH /api/v1/atividades-ensino/:id", () => {
     expect(body.data.descricao).toBe("Nova descrição");
   });
 });
+
+describe("DELETE /api/v1/atividades-ensino/:id", () => {
+  test("exclui uma atividade de ensino existente", async () => {
+    const instituicao = await Instituicao.create({
+      nome: `Instituição ${randomUUID()}`,
+      sigla: `INS-${randomUUID().slice(0, 6)}`,
+    });
+
+    instituicaoIdCriada = instituicao.id;
+
+    const programa = await Programa.create({
+      instituicao_id: instituicao.id,
+      nome: `Programa ${randomUUID()}`,
+      sigla: `PRO-${randomUUID().slice(0, 6)}`,
+    });
+
+    programaIdCriado = programa.id;
+
+    const pessoa = await Pessoa.create({
+      nome_completo: `Pessoa ${randomUUID()}`,
+      lattes_id: randomUUID(),
+    });
+
+    pessoaIdCriada = pessoa.id;
+
+    const docente = await Docente.create({
+      pessoa_id: pessoa.id,
+      programa_id: programa.id,
+      categoria: "Permanente",
+      ativo: 1,
+    });
+
+    docenteIdCriado = docente.id;
+
+    const atividade = await AtividadeEnsino.create({
+      docente_id: docente.id,
+      tipo: "Disciplina",
+      disciplina: "Banco de Dados",
+    });
+
+    atividadeEnsinoIdCriada = atividade.id;
+
+    const response = await fetch(
+      `${baseUrl}/api/v1/atividades-ensino/${atividade.id}`,
+      {
+        method: "DELETE",
+      },
+    );
+
+    expect(response.status).toBe(204);
+
+    const atividadeExcluida = await AtividadeEnsino.findByPk(atividade.id);
+
+    expect(atividadeExcluida).toBeNull();
+
+    atividadeEnsinoIdCriada = null;
+  });
+
+  test("retorna 404 quando a atividade de ensino não existe", async () => {
+    const response = await fetch(`${baseUrl}/api/v1/atividades-ensino/999999`, {
+      method: "DELETE",
+    });
+
+    const body = await response.json();
+
+    expect(response.status).toBe(404);
+    expect(body.error.code).toBe("ATIVIDADE_ENSINO_NOT_FOUND");
+  });
+
+  test("retorna 400 quando o id é zero", async () => {
+    const response = await fetch(`${baseUrl}/api/v1/atividades-ensino/0`, {
+      method: "DELETE",
+    });
+
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.error.code).toBe("VALIDATION_ERROR");
+  });
+
+  test("retorna 400 quando o id é negativo", async () => {
+    const response = await fetch(`${baseUrl}/api/v1/atividades-ensino/-1`, {
+      method: "DELETE",
+    });
+
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.error.code).toBe("VALIDATION_ERROR");
+  });
+
+  test("retorna 400 quando o id é decimal", async () => {
+    const response = await fetch(`${baseUrl}/api/v1/atividades-ensino/1.5`, {
+      method: "DELETE",
+    });
+
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.error.code).toBe("VALIDATION_ERROR");
+  });
+});
