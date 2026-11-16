@@ -83,6 +83,47 @@ class ParticipacaoProjetoPesquisaService {
 
     return participacao;
   }
+
+  async listar(options = {}) {
+    return this.repository.findAll(options);
+  }
+
+  async buscarPorId(id, options = {}) {
+    const participacao = await this.repository.findById(id, options);
+
+    if (!participacao) {
+      throw new AppError(
+        "A participação no projeto de pesquisa não foi encontrada.",
+        {
+          statusCode: 404,
+          code: "PARTICIPACAO_PROJETO_PESQUISA_NOT_FOUND",
+        },
+      );
+    }
+
+    return participacao;
+  }
+
+  async atualizar(id, dados, options = {}) {
+    const participacao = await this.buscarPorId(id, options);
+
+    const papel = dados.papel?.trim() || null;
+
+    await participacao.update(
+      {
+        papel,
+      },
+      options,
+    );
+
+    return participacao;
+  }
+
+  async excluir(id, options = {}) {
+    const participacao = await this.buscarPorId(id, options);
+
+    await participacao.destroy(options);
+  }
 }
 
 export default ParticipacaoProjetoPesquisaService;
