@@ -75,3 +75,111 @@ afterAll(async () => {
 
   await sequelize.close();
 });
+
+describe("POST /api/v1/participacoes-projeto-pesquisa", () => {
+  test("deve criar uma participação em projeto de pesquisa", async () => {
+    const pessoa = await Pessoa.create({
+      nome_completo: `Pessoa Teste ${randomUUID()}`,
+      lattes_id: randomUUID(),
+    });
+
+    pessoaIdCriada = pessoa.id;
+
+    const projeto = await ProjetoPesquisa.create({
+      titulo: `Projeto de Pesquisa ${randomUUID()}`,
+    });
+
+    projetoIdCriado = projeto.id;
+
+    const response = await fetch(
+      `${baseUrl}/api/v1/participacoes-projeto-pesquisa`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          projeto_id: projeto.id,
+          pessoa_id: pessoa.id,
+          papel: "Pesquisador",
+        }),
+      },
+    );
+
+    const body = await response.json();
+
+    expect(response.status).toBe(201);
+
+    expect(body.data).toEqual(
+      expect.objectContaining({
+        id: expect.any(Number),
+        projeto_id: projeto.id,
+        pessoa_id: pessoa.id,
+        papel: "Pesquisador",
+      }),
+    );
+
+    participacaoIdCriada = body.data.id;
+  });
+  
+  test("não deve permitir participação duplicada no mesmo projeto", async () => {
+    const pessoa = await Pessoa.create({
+      nome_completo: `Pessoa Teste ${randomUUID()}`,
+      lattes_id: randomUUID(),
+    });
+
+    pessoaIdCriada = pessoa.id;
+
+    const projeto = await ProjetoPesquisa.create({
+      titulo: `Projeto de Pesquisa ${randomUUID()}`,
+    });
+
+    projetoIdCriado = projeto.id;
+
+    const primeiraResponse = await fetch(
+      `${baseUrl}/api/v1/participacoes-projeto-pesquisa`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          projeto_id: projeto.id,
+          pessoa_id: pessoa.id,
+          papel: "Pesquisador",
+        }),
+      },
+    );
+
+    const primeiraBody = await primeiraResponse.json();
+
+    expect(primeiraResponse.status).toBe(201);
+
+    participacaoIdCriada = primeiraBody.data.id;
+
+    const segundaResponse = await fetch(
+      `${baseUrl}/api/v1/participacoes-projeto-pesquisa`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          projeto_id: projeto.id,
+          pessoa_id: pessoa.id,
+          papel: "Coordenador",
+        }),
+      },
+    );
+
+    const segundaBody = await segundaResponse.json();
+
+    expect(segundaResponse.status).toBe(409);
+
+    expect(segundaBody.error).toEqual(
+      expect.objectContaining({
+        code: "PARTICIPACAO_PROJETO_PESQUISA_ALREADY_EXISTS",
+      }),
+    );
+  });
+});

@@ -57,11 +57,9 @@ class ParticipacaoProjetoPesquisaService {
 
     const papel = dados.papel?.trim() || null;
 
-    const participacaoExistente = await this.repository.findOne(
-      {
-        projeto_id,
-        pessoa_id,
-      },
+    const participacaoExistente = await this.repository.findByProjetoAndPessoa(
+      projeto_id,
+      pessoa_id,
       options,
     );
 

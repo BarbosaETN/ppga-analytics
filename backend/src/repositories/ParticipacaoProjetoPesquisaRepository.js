@@ -7,6 +7,16 @@ class ParticipacaoProjetoPesquisaRepository extends BaseRepository {
     constructor() {
         super(ParticipacaoProjetoPesquisa);
     }
+
+    async findByProjetoAndPessoa(projeto_id, pessoa_id, options = {}) {
+        return this.model.findOne({
+            where: {
+                projeto_id,
+                pessoa_id
+            },
+            ...options
+        });
+    }
 }
 
 export default ParticipacaoProjetoPesquisaRepository;

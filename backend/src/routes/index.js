@@ -30,6 +30,6 @@ router.use('/processamentos', processamentoRouter);
 router.use('/formacoes', formacaoRouter);
 router.use('/orientacoes', orientacaoRouter);
 router.use('/atividades-ensino', atividadeEnsinoRouter);
-router.use('/particoes-projeto-pesquisa', participacaoProjetoPesquisaRouter);
+router.use('/participacoes-projeto-pesquisa', participacaoProjetoPesquisaRouter);
 
 export default router;
