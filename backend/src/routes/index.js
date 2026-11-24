@@ -16,6 +16,7 @@ import orientacaoRouter from "./orientacao.routes.js";
 import atividadeEnsinoRouter from "./atividade-ensino.routes.js";
 import participacaoProjetoPesquisaRouter from "./participacao-projeto-pesquisa.routes.js";
 import participacaoProjetoExtensaoRouter from "./participacao-projeto-extensao.routes.js";
+import projetoExtensaoRouter from './projeto-extensao.routes.js';
 
 const router = Router();
 
@@ -31,6 +32,10 @@ router.use("/processamentos", processamentoRouter);
 router.use("/formacoes", formacaoRouter);
 router.use("/orientacoes", orientacaoRouter);
 router.use("/atividades-ensino", atividadeEnsinoRouter);
+router.use(
+    '/projetos-extensao',
+    projetoExtensaoRouter
+);
 router.use(
   "/participacoes-projeto-pesquisa",
   participacaoProjetoPesquisaRouter,
